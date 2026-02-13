@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TWD Universe: Chronological Watch Order Tracker</title>
+<meta name="description" content="Track every TWD show and spin-off in order with this interactive survival guide and checklist.">
+<script src="widget.js" async></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg-color: #1a1a1a;
+--container-bg: #2b2b2b;
+--text-color: #e0e0e0;
+--accent-color: #b30000;
+--accent-hover: #ff4141;
+--border-color: #444;
+--watched-color: #5a5a5a;
+--twd-color: #CD5C5C;
+--ftwd-color: #4682B4;
+--wb-color: #6B8E23;
+--tales-color: #DAA520;
+--dc-color: #8A2BE2;
+--dd-color: #20B2AA;
+--towl-color: #D2691E;
+--font-header: 'Creepster', cursive;
+--font-body: 'Roboto', sans-serif;
+}
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+body {
+font-family: var(--font-body);
+background-color: var(--bg-color);
+background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Cg fill-rule="evenodd"%3E%3Cg fill="%232a2a2a" fill-opacity="0.4"%3E%3Cpath opacity=".5" d="M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z"/%3E%3Cpath d="M6 5V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h4V0h1v5h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v4h5v1h-5v5h-1h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5h-1v-5h-4v5H6v-5H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5v-4H1v-1h5V6h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h1V1h4v5h-5z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+color: var(--text-color);
+line-height: 1.6;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+.container {
+max-width: 900px;
+margin: 0 auto;
+padding: 20px;
+}
+header {
+text-align: center;
+padding: 20px 0 40px;
+border-bottom: 3px solid var(--accent-color);
+margin-bottom: 40px;
+}
+header h1 {
+font-family: var(--font-header);
+font-size: 4rem;
+color: var(--accent-color);
+letter-spacing: 3px;
+text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+margin-bottom: 10px;
+}
+.progress-tracker {
+background-color: var(--container-bg);
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 15px;
+margin-bottom: 20px;
+}
+.progress-bar-container {
+width: 100%;
+background-color: #555;
+border-radius: 20px;
+height: 25px;
+overflow: hidden;
+border: 1px solid var(--border-color);
+}
+.progress-bar {
+height: 100%;
+width: 0%;
+background: linear-gradient(90deg, #8B0000 0%, #B30000 100%);
+transition: width 0.5s ease-in-out;
+text-align: center;
+color: white;
+font-weight: bold;
+line-height: 25px;
+}
+#progress-text {
+text-align: center;
+margin-top: 10px;
+font-weight: bold;
+color: var(--text-color);
+}
+.phase-header {
+font-family: var(--font-header);
+font-size: 1.8rem;
+color: var(--text-color);
+border-bottom: 2px solid var(--border-color);
+padding-bottom: 10px;
+margin-top: 50px;
+margin-bottom: 20px;
+letter-spacing: 2px;
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+}
+.phase-header .phase-description {
+font-family: var(--font-body);
+font-size: 1rem;
+color: #aaa;
+letter-spacing: normal;
+font-weight: normal;
+}
+.episode-list {
+list-style: none;
+padding: 0;
+}
+.episode-item {
+display: flex;
+align-items: center;
+background-color: var(--container-bg);
+margin-bottom: 10px;
+padding: 15px;
+border-radius: 5px;
+border: 1px solid var(--border-color);
+border-left-width: 5px;
+transition: background-color 0.3s, transform 0.2s;
+position: relative;
+}
+.episode-item:hover {
+background-color: #383838;
+transform: scale(1.01);
+}
+.episode-item.twd {
+border-left-color: var(--twd-color);
+}
+.episode-item.ftwd {
+border-left-color: var(--ftwd-color);
+}
+.episode-item.wb {
+border-left-color: var(--wb-color);
+}
+.episode-item.tales {
+border-left-color: var(--tales-color);
+}
+.episode-item.dc {
+border-left-color: var(--dc-color);
+}
+.episode-item.dd {
+border-left-color: var(--dd-color);
+}
+.episode-item.towl {
+border-left-color: var(--towl-color);
+}
+.episode-info {
+flex-grow: 1;
+}
+.episode-info .show-title {
+font-weight: bold;
+font-size: 0.8rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 5px;
+}
+.episode-info .show-title.twd {
+color: var(--twd-color);
+}
+.episode-info .show-title.ftwd {
+color: var(--ftwd-color);
+}
+.episode-info .show-title.wb {
+color: var(--wb-color);
+}
+.episode-info .show-title.tales {
+color: var(--tales-color);
+}
+.episode-info .show-title.dc {
+color: var(--dc-color);
+}
+.episode-info .show-title.dd {
+color: var(--dd-color);
+}
+.episode-info .show-title.towl {
+color: var(--towl-color);
+}
+.episode-details {
+font-size: 1.1rem;
+}
+.episode-details .ep-number {
+font-weight: 700;
+color: #ccc;
+margin-right: 15px;
+}
+.watch-toggle {
+display: flex;
+align-items: center;
+cursor: pointer;
+padding: 5px;
+}
+.watch-toggle input[type="checkbox"] {
+display: none;
+}
+.watch-toggle .custom-checkbox {
+width: 28px;
+height: 28px;
+background-color: #444;
+border: 2px solid var(--border-color);
+border-radius: 4px;
+position: relative;
+transition: background-color 0.3s;
+}
+.watch-toggle:hover .custom-checkbox {
+background-color: #555;
+}
+.watch-toggle .custom-checkbox::after {
+content: 'X';
+font-size: 20px;
+font-weight: bold;
+color: var(--accent-color);
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) scale(0);
+transition: transform 0.2s ease-in-out;
+text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+.watch-toggle input[type="checkbox"]:checked+.custom-checkbox {
+background-color: #333;
+}
+.watch-toggle input[type="checkbox"]:checked+.custom-checkbox::after {
+transform: translate(-50%, -50%) scale(1.2);
+}
+.episode-item.watched {
+opacity: 0.6;
+background-color: #222;
+}
+.episode-item.watched .episode-details {
+text-decoration: line-through;
+color: var(--watched-color);
+}
+@media (max-width: 768px) {
+header h1 {
+font-size: 2.8rem;
+}
+.phase-header {
+font-size: 2rem;
+flex-direction: column;
+align-items: flex-start;
+}
+.episode-item {
+flex-direction: column;
+align-items: flex-start;
+padding: 10px;
+}
+.episode-info {
+margin-bottom: 10px;
+}
+.watch-toggle {
+align-self: flex-end;
+}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>The Walking Dead Universe</h1>
+<p>Chronological Survival Guide</p>
+<button style="display: block; margin: 20px auto 0 auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
+</header>
+<main>
+<div class="progress-tracker">
+<div id="progress-text">Calculating survival rate...</div>
+<div class="progress-bar-container">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+</div>
+<div id="episode-container">
+</div>
+</main>
+</div>
+<script>
+const chronologicalPhases = [{
+title: "PHASE 1: The Initial Outbreak and The Fall",
+description: "Day 0 - ~Day 45",
+episodes: [{
+"show": "Fear the Walking Dead: Dead in the Water",
+"season": 1,
+"episode": 1,
+"title": "Complete Series"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 1,
+"title": "Pilot"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 2,
+"title": "So Close, Yet So Far"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 3,
+"title": "The Dog"
+},
+{
+"show": "Fear the Walking Dead: Flight 462",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 4,
+"title": "Not Fade Away"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 5,
+"title": "Cobalt"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 1,
+"episode": 6,
+"title": "The Good Man"
+},
+{
+"show": "The Walking Dead: Torn Apart",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 1,
+"title": "Days Gone Bye"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 2,
+"title": "Guts"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 3,
+"title": "Tell It to the Frogs"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 4,
+"title": "Vatos"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 5,
+"title": "Wildfire"
+},
+{
+"show": "The Walking Dead",
+"season": 1,
+"episode": 6,
+"title": "TS-19"
+},
+]
+},
+{
+title: "PHASE 2: Post-Atlanta and the Farm",
+description: "Approx. Year 1",
+episodes: [{
+"show": "The Walking Dead: Cold Storage",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "The Walking Dead: The Oath",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 1,
+"title": "What Lies Ahead"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 2,
+"title": "Bloodletting"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 3,
+"title": "Save the Last One"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 4,
+"title": "Cherokee Rose"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 5,
+"title": "Chupacabra"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 6,
+"title": "Secrets"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 7,
+"title": "Pretty Much Dead Already"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 8,
+"title": "Nebraska"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 9,
+"title": "Triggers"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 10,
+"title": "18 Miles Out"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 11,
+"title": "Judge, Jury, Executioner"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 12,
+"title": "Better Angels"
+},
+{
+"show": "The Walking Dead",
+"season": 2,
+"episode": 13,
+"title": "Beside the Dying Fire"
+},
+]
+},
+{
+title: "PHASE 3: The Prison, Woodbury, and the Sea",
+description: "Concurrent Timelines",
+episodes: [{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 1,
+"title": "Seed"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 2,
+"title": "Sick"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 3,
+"title": "Walk with Me"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 4,
+"title": "Killer Within"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 5,
+"title": "Say the Word"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 6,
+"title": "Hounded"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 7,
+"title": "When the Dead Come Knocking"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 8,
+"title": "Made to Suffer"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 9,
+"title": "The Suicide King"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 10,
+"title": "Home"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 11,
+"title": "I Ain't a Judas"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 12,
+"title": "Clear"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 13,
+"title": "Arrow on the Doorpost"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 14,
+"title": "Prey"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 15,
+"title": "This Sorrowful Life"
+},
+{
+"show": "The Walking Dead",
+"season": 3,
+"episode": 16,
+"title": "Welcome to the Tombs"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 1,
+"title": "Monster"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 2,
+"title": "We All Fall Down"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 3,
+"title": "Ouroboros"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 4,
+"title": "Blood in the Streets"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 5,
+"title": "Captive"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 6,
+"title": "Sicut Servus"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 7,
+"title": "Shiva"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 8,
+"title": "Grotesque"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 9,
+"title": "Pillar of Salt"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 10,
+"title": "Do Not Disturb"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 11,
+"title": "Pablo & Jessica"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 12,
+"title": "Date of Death"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 13,
+"title": "Date of Death"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 14,
+"title": "Wrath"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 2,
+"episode": 15,
+"title": "North"
+},
+{
+"show": "Fear the Walking Dead: Passage",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 1,
+"title": "Eye of the Beholder"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 2,
+"title": "The New Frontier"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 3,
+"title": "Teotwawki"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 4,
+"title": "100"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 5,
+"title": "Burning in Water, Drowning in Flame"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 6,
+"title": "Red Dirt"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 7,
+"title": "The Unveiling"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 8,
+"title": "Children of Wrath"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 9,
+"title": "Minotaur"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 10,
+"title": "The Diviner"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 11,
+"title": "La Serpiente"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 12,
+"title": "Brother's Keeper"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 13,
+"title": "This Land Is Your Land"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 14,
+"title": "El Matadero"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 15,
+"title": "Things Bad Begun"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 3,
+"episode": 16,
+"title": "Sleigh Ride"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 1,
+"title": "30 Days Without an Accident"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 2,
+"title": "Infected"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 3,
+"title": "Isolation"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 4,
+"title": "Indifference"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 5,
+"title": "Internment"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 6,
+"title": "Live Bait"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 7,
+"title": "Dead Weight"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 8,
+"title": "Too Far Gone"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 9,
+"title": "After"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 10,
+"title": "Inmates"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 11,
+"title": "Claimed"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 12,
+"title": "Still"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 13,
+"title": "Alone"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 14,
+"title": "The Grove"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 15,
+"title": "Us"
+},
+{
+"show": "The Walking Dead",
+"season": 4,
+"episode": 16,
+"title": "A"
+},
+]
+},
+{
+title: "PHASE 4: Terminus, Hospital, and Alexandria",
+description: "The Road to a New Home",
+episodes: [{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 1,
+"title": "No Sanctuary"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 2,
+"title": "Strangers"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 3,
+"title": "Four Walls and a Roof"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 4,
+"title": "Slabtown"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 5,
+"title": "Self Help"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 6,
+"title": "Consumed"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 7,
+"title": "Crossed"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 8,
+"title": "Coda"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 9,
+"title": "What Happened and What's Going On"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 10,
+"title": "Them"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 11,
+"title": "The Distance"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 12,
+"title": "Remember"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 13,
+"title": "Forget"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 14,
+"title": "Spend"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 15,
+"title": "Try"
+},
+{
+"show": "The Walking Dead",
+"season": 5,
+"episode": 16,
+"title": "Conquer"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 1,
+"title": "First Time Again"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 2,
+"title": "JSS"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 3,
+"title": "Thank You"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 4,
+"title": "Here's Not Here"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 5,
+"title": "Now"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 6,
+"title": "Always Accountable"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 7,
+"title": "Heads Up"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 8,
+"title": "Start to Finish"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 9,
+"title": "No Way Out"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 10,
+"title": "The Next World"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 11,
+"title": "Knots Untie"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 12,
+"title": "Not Tomorrow Yet"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 13,
+"title": "The Same Boat"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 14,
+"title": "Twice as Far"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 15,
+"title": "East"
+},
+{
+"show": "The Walking Dead",
+"season": 6,
+"episode": 16,
+"title": "Last Day on Earth"
+},
+]
+},
+{
+title: "PHASE 5: The War Against Negan",
+description: "All Out War",
+episodes: [{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 1,
+"title": "The Day Will Come When You Won't Be"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 2,
+"title": "The Well"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 3,
+"title": "The Cell"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 4,
+"title": "Service"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 5,
+"title": "Go Getters"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 6,
+"title": "Swear"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 7,
+"title": "Sing Me a Song"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 8,
+"title": "Hearts Still Beating"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 9,
+"title": "Rock in the Road"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 10,
+"title": "New Best Friends"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 11,
+"title": "Hostiles and Calamities"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 12,
+"title": "Say Yes"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 13,
+"title": "Bury Me Here"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 14,
+"title": "The Other Side"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 15,
+"title": "Something They Need"
+},
+{
+"show": "The Walking Dead",
+"season": 7,
+"episode": 16,
+"title": "The First Day of the Rest of Your Life"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 1,
+"title": "Mercy"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 2,
+"title": "The Damned"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 3,
+"title": "Monsters"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 4,
+"title": "Some Guy"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 5,
+"title": "The Big Scary U"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 6,
+"title": "The King, the Widow, and Rick"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 7,
+"title": "Time for After"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 8,
+"title": "How It's Gotta Be"
+},
+{
+"show": "The Walking Dead: Red Machete",
+"season": 1,
+"episode": 1,
+"title": "Complete Webisodes"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 9,
+"title": "Honor"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 10,
+"title": "The Lost and the Plunderers"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 11,
+"title": "Dead or Alive Or"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 12,
+"title": "The Key"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 13,
+"title": "Do Not Send Us Astray"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 14,
+"title": "Still Gotta Mean Something"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 15,
+"title": "Worth"
+},
+{
+"show": "The Walking Dead",
+"season": 8,
+"episode": 16,
+"title": "Wrath"
+},
+]
+},
+{
+title: "PHASE 6: Crossovers and Time Jumps",
+description: "The Whisperer War",
+episodes: [{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 1,
+"title": "What's Your Story?"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 2,
+"title": "Another Day in the Diamond"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 3,
+"title": "Good Out Here"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 4,
+"title": "Buried"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 5,
+"title": "Laura"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 6,
+"title": "Just in Case"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 7,
+"title": "The Wrong Things"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 8,
+"title": "No One's Gone"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 9,
+"title": "People Like Us"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 10,
+"title": "Close Your Eyes"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 11,
+"title": "The Code"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 12,
+"title": "Weak"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 13,
+"title": "Blackjack"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 14,
+"title": "MM 54"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 15,
+"title": "I Lose People..."
+},
+{
+"show": "Fear the Walking Dead",
+"season": 4,
+"episode": 16,
+"title": "...I Lose Myself"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 1,
+"title": "A New Beginning"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 2,
+"title": "The Bridge"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 3,
+"title": "Warning Signs"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 4,
+"title": "The Obliged"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 5,
+"title": "What Comes After"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 6,
+"title": "Who Are You Now?"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 7,
+"title": "Stradivarius"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 8,
+"title": "Evolution"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 9,
+"title": "Adaptation"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 10,
+"title": "Omega"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 11,
+"title": "Bounty"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 12,
+"title": "Guardians"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 13,
+"title": "Chokepoint"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 14,
+"title": "Scars"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 15,
+"title": "The Calm Before"
+},
+{
+"show": "The Walking Dead",
+"season": 9,
+"episode": 16,
+"title": "The Storm"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 1,
+"title": "Here to Help"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 2,
+"title": "The Hurt That Will Happen"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 3,
+"title": "Humbug's Gulch"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 4,
+"title": "Skidmark"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 5,
+"title": "The End of Everything"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 6,
+"title": "The Little Prince"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 7,
+"title": "Still Standing"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 8,
+"title": "Is Anybody Out There?"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 9,
+"title": "Channel 4"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 10,
+"title": "210 Words Per Minute"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 11,
+"title": "You're Still Here"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 12,
+"title": "Nerdy Birds"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 13,
+"title": "Leave What You Don't"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 14,
+"title": "Today and Tomorrow"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 15,
+"title": "Channel 5"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 5,
+"episode": 16,
+"title": "End of the Line"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 1,
+"title": "Lines We Cross"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 2,
+"title": "We Are the End of the World"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 3,
+"title": "Ghosts"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 4,
+"title": "Silence the Whisperers"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 5,
+"title": "What It Has to Be"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 6,
+"title": "Bonds"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 7,
+"title": "Open Your Eyes"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 8,
+"title": "The World Before"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 9,
+"title": "Squeeze"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 10,
+"title": "Stalker"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 11,
+"title": "Morning Star"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 12,
+"title": "Walk with Us"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 13,
+"title": "What We Become"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 14,
+"title": "Look at the Flowers"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 15,
+"title": "The Tower"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 16,
+"title": "A Certain Doom"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 1,
+"title": "The End is the Beginning"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 2,
+"title": "Welcome to the Club"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 3,
+"title": "Alaska"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 4,
+"title": "The Key"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 5,
+"title": "Escalares"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 6,
+"title": "Bury Her Next to Jasper's Leg"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 7,
+"title": "Damage from the Inside"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 8,
+"title": "The Door"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 9,
+"title": "Things Left to Do"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 10,
+"title": "Handle with Care"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 11,
+"title": "The Holding"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 12,
+"title": "In Dreams"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 13,
+"title": "J.D."
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 14,
+"title": "Mother"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 15,
+"title": "USS Pennsylvania"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 6,
+"episode": 16,
+"title": "The Beginning"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 17,
+"title": "Home Sweet Home"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 18,
+"title": "Find Me"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 19,
+"title": "One More"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 20,
+"title": "Splinter"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 21,
+"title": "Diverged"
+},
+{
+"show": "The Walking Dead",
+"season": 10,
+"episode": 22,
+"title": "Here's Negan"
+},
+]
+},
+{
+title: "PHASE 7: The Commonwealth and CRM",
+description: "Years 10 - 11",
+episodes: [{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 1,
+"title": "Acheron: Part I"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 2,
+"title": "Acheron: Part II"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 3,
+"title": "Hunted"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 4,
+"title": "Rendition"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 5,
+"title": "Out of the Ashes"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 6,
+"title": "On the Inside"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 7,
+"title": "Promises Broken"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 8,
+"title": "For Blood"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 1,
+"title": "Brave"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 2,
+"title": "The Blaze of Gory"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 3,
+"title": "The Tyger and the Lamb"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 4,
+"title": "The Wrong End of a Telescope"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 5,
+"title": "Madman Across the Water"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 6,
+"title": "Shadow Puppets"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 7,
+"title": "Truth or Dare"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 8,
+"title": "The Sky Is a Graveyard"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 9,
+"title": "The Deepest Cut"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 1,
+"episode": 10,
+"title": "In an Unfamiliar Place"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 1,
+"title": "The Beacon"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 2,
+"title": "Six Hours"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 3,
+"title": "Cindy Hawkins"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 4,
+"title": "Breathe with Me"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 5,
+"title": "Till Death"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 6,
+"title": "Reclamation"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 7,
+"title": "The Portrait"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 8,
+"title": "PADRE"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 9,
+"title": "Follow Me"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 10,
+"title": "Mourning Cloak"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 11,
+"title": "Ofelia"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 12,
+"title": "Sonny Boy"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 13,
+"title": "The Raft"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 14,
+"title": "Divine Providence"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 15,
+"title": "Amina"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 7,
+"episode": 16,
+"title": "Gone"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 9,
+"title": "No Other Way"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 10,
+"title": "New Haunts"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 11,
+"title": "Rogue Element"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 12,
+"title": "The Lucky Ones"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 13,
+"title": "Warlords"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 14,
+"title": "The Rotten Core"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 15,
+"title": "Trust"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 16,
+"title": "Acts of God"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 1,
+"title": "Konsekans"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 2,
+"title": "Fed-de-Deye"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 3,
+"title": "Exit Wounds"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 4,
+"title": "Family is a Four Letter Word"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 5,
+"title": "Quartering"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 6,
+"title": "Who Are You?"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 7,
+"title": "Blood and Lies"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 8,
+"title": "Returning Point"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 9,
+"title": "Death and the Dead"
+},
+{
+"show": "The Walking Dead: World Beyond",
+"season": 2,
+"episode": 10,
+"title": "The Last Light"
+},
+]
+},
+{
+title: "PHASE 8: Final Conflicts and Farewells",
+description: "Conclusion of Main Series",
+episodes: [{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 17,
+"title": "Lockdown"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 18,
+"title": "A New Deal"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 19,
+"title": "Variant"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 20,
+"title": "What's Been Lost"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 21,
+"title": "Outpost 22"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 22,
+"title": "Faith"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 23,
+"title": "Family"
+},
+{
+"show": "The Walking Dead",
+"season": 11,
+"episode": 24,
+"title": "Rest in Peace"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 1,
+"title": "Remember What They Took From You"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 2,
+"title": "Blue Jay"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 3,
+"title": "Odessa"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 4,
+"title": "King County"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 5,
+"title": "More Time Than You Know"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 6,
+"title": "All I See Is Paint"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 7,
+"title": "Anton"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 8,
+"title": "Iron Tiger"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 9,
+"title": "Sanctuary"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 10,
+"title": "Keeping Her Safe"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 11,
+"title": "Fighting Like You"
+},
+{
+"show": "Fear the Walking Dead",
+"season": 8,
+"episode": 12,
+"title": "The Road Ahead"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 1,
+"title": "Evie/Joe"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 2,
+"title": "Blair/Gina"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 3,
+"title": "Dee"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 4,
+"title": "Amy/Dr. Everett"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 5,
+"title": "Davon"
+},
+{
+"show": "Tales of the Walking Dead",
+"season": 1,
+"episode": 6,
+"title": "La Doña"
+},
+]
+},
+{
+title: "PHASE 9: The New Era Spin-offs",
+description: "The Latest Chronological Events",
+episodes: [{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 1,
+"title": "Old Acquaintances"
+},
+{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 2,
+"title": "Who's There?"
+},
+{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 3,
+"title": "People Are a Resource"
+},
+{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 4,
+"title": "Everybody's Gettin' Off"
+},
+{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 5,
+"title": "Stories We Tell"
+},
+{
+"show": "The Walking Dead: Dead City",
+"season": 1,
+"episode": 6,
+"title": "Doma Smo"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 1,
+"title": "L'âme Perdue"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 2,
+"title": "Alouette"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 3,
+"title": "Deux Amours"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 4,
+"title": "La Dame de Fer"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 5,
+"title": "Deux Clans"
+},
+{
+"show": "The Walking Dead: Daryl Dixon",
+"season": 1,
+"episode": 6,
+"title": "Coming Home"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 1,
+"title": "Years"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 2,
+"title": "Gone"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 3,
+"title": "Bye"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 4,
+"title": "What We"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 5,
+"title": "Become"
+},
+{
+"show": "The Walking Dead: The Ones Who Live",
+"season": 1,
+"episode": 6,
+"title": "The Last Act"
+}
+]
+}
+];
+document.addEventListener('DOMContentLoaded', () => {
+const container = document.getElementById('episode-container');
+let totalEpisodes = 0;
+const showClassMap = {
+"The Walking Dead": "twd",
+"Fear the Walking Dead": "ftwd",
+"The Walking Dead: World Beyond": "wb",
+"Tales of the Walking Dead": "tales",
+"The Walking Dead: Dead City": "dc",
+"The Walking Dead: Daryl Dixon": "dd",
+"The Walking Dead: The Ones Who Live": "towl",
+"Fear the Walking Dead: Dead in the Water": "ftwd",
+"Fear the Walking Dead: Flight 462": "ftwd",
+"Fear the Walking Dead: Passage": "ftwd",
+"The Walking Dead: Torn Apart": "twd",
+"The Walking Dead: Cold Storage": "twd",
+"The Walking Dead: The Oath": "twd",
+"The Walking Dead: Red Machete": "twd"
+};
+chronologicalPhases.forEach(phase => {
+const phaseHeader = document.createElement('h2');
+phaseHeader.className = 'phase-header';
+phaseHeader.innerHTML = `${phase.title} <span class="phase-description">${phase.description}</span>`;
+container.appendChild(phaseHeader);
+const episodeList = document.createElement('ul');
+episodeList.className = 'episode-list';
+phase.episodes.forEach(ep => {
+totalEpisodes++;
+const safeShowTitle = ep.show.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+const epId = `${safeShowTitle}-s${ep.season}-e${ep.episode}`;
+const li = document.createElement('li');
+const showClass = showClassMap[ep.show] || '';
+li.className = `episode-item ${showClass}`;
+li.id = `item-${epId}`;
+const seasonStr = String(ep.season).padStart(2, '0');
+const episodeStr = String(ep.episode).padStart(2, '0');
+li.innerHTML = `
+<div class="episode-info">
+<div class="show-title ${showClass}">${ep.show}</div>
+<div class="episode-details">
+<span class="ep-number">S${seasonStr}E${episodeStr}</span>
+<span class="ep-title">${ep.title}</span>
+</div>
+</div>
+<label class="watch-toggle" for="${epId}">
+<input type="checkbox" id="${epId}">
+<div class="custom-checkbox"></div>
+</label>
+`;
+episodeList.appendChild(li);
+const checkbox = li.querySelector(`#${epId}`);
+if (localStorage.getItem(epId) === 'true') {
+checkbox.checked = true;
+li.classList.add('watched');
+}
+checkbox.addEventListener('change', (event) => {
+if (event.target.checked) {
+localStorage.setItem(epId, 'true');
+li.classList.add('watched');
+} else {
+localStorage.removeItem(epId);
+li.classList.remove('watched');
+}
+updateProgress();
+});
+});
+container.appendChild(episodeList);
+});
+function updateProgress() {
+let watchedCount = 0;
+const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+allCheckboxes.forEach(box => {
+if (box.checked) {
+watchedCount++;
+}
+});
+const percentage = totalEpisodes > 0 ? (watchedCount / totalEpisodes) * 100 : 0;
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progress-text');
+progressBar.style.width = `${percentage}%`;
+progressBar.textContent = `${Math.round(percentage)}%`;
+progressText.textContent = `You've survived ${watchedCount} of ${totalEpisodes} episodes.`;
+}
+updateProgress();
+});
+</script>
+</body>
+</html>

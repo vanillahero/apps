@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fabler</title>
+<style>
+body {
+font-family: sans-serif;
+margin: 20px;
+background-color: #1e1e1e;
+color: #f0f0f0;
+}
+h1,
+h2,
+h3,
+label {
+color: #f0f0f0;
+}
+.container {
+display: flex;
+gap: 20px;
+max-width: 1200px;
+margin: 0 auto;
+}
+.scene-manager {
+flex: 1;
+padding: 15px;
+border-right: 1px solid #444;
+background: #252526;
+border-radius: 5px;
+}
+.scene-editor {
+flex: 3;
+padding: 20px;
+background: #252526;
+border-radius: 5px;
+}
+.choice-group {
+margin-bottom: 15px;
+padding: 10px;
+border: 1px solid #333;
+border-radius: 4px;
+background-color: #333333;
+}
+input[type="text"],
+textarea,
+select {
+width: 100%;
+padding: 8px;
+margin-top: 5px;
+box-sizing: border-box;
+border: 1px solid #444;
+border-radius: 4px;
+background-color: #333333;
+color: #f0f0f0;
+}
+select option {
+background-color: #333333;
+color: #f0f0f0;
+}
+button {
+padding: 10px 15px;
+background-color: #5e8dff;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+margin-top: 10px;
+transition: background-color 0.2s;
+}
+button:hover {
+background-color: #446ee0;
+}
+#deleteSceneBtn {
+background-color: #dc3545;
+margin-left: 10px;
+}
+#deleteSceneBtn:hover {
+background-color: #a82a36;
+}
+.scene-list {
+list-style: none;
+padding: 0;
+}
+.scene-list li {
+padding: 8px;
+margin-bottom: 5px;
+background: #333333;
+color: #f0f0f0;
+border-radius: 3px;
+cursor: pointer;
+transition: background-color 0.2s;
+}
+.scene-list li:hover {
+background: #444444;
+}
+.scene-list li.active {
+background: #ffc107;
+color: #1e1e1e;
+font-weight: bold;
+}
+.error {
+color: #ff6b6b;
+}
+hr {
+border-color: #444;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="scene-manager">
+<h2>Scenes</h2>
+<button id="addSceneBtn">Add New Scene</button>
+<ul id="sceneList" class="scene-list"></ul>
+<hr>
+<h3>Game Settings</h3>
+<label for="startSceneSelect">Starting Scene:</label>
+<select id="startSceneSelect"></select>
+<p><small class="error" id="validationMessage"></small></p>
+<button id="generateGameBtn">Generate Game HTML</button>
+<hr>
+<h3>Project Management</h3>
+<button id="exportProjectBtn">Export Project (JSON)</button>
+<button id="newGameBtn" style="background-color: #f44336;">New Game</button>
+<label for="importProjectInput" style="display: block; margin-top: 10px;">Import Project (JSON):</label>
+<input type="file" id="importProjectInput" accept=".json">
+</div>
+<div class="scene-editor">
+<h2>Edit Scene: <span id="currentSceneIdDisplay"></span></h2>
+<p id="noSceneSelectedText">Select or create a scene to begin editing.</p>
+<form id="sceneForm" style="display: none;">
+<label for="sceneName">Scene Name:</label>
+<input type="text" id="sceneName" placeholder="e.g., Forest Path, Main Menu" required>
+<label for="sceneText" style="margin-top: 15px; display: block;">Scene Narration/Dialogue:</label>
+<textarea id="sceneText" rows="6"></textarea>
+<h3 style="margin-top: 20px;">Scene Image (600x600px)</h3>
+<label for="imageGallerySelect" style="display: block; margin-top: 10px;">Select Existing Image:</label>
+<select id="imageGallerySelect" style="width: 100%; padding: 8px; margin-top: 5px;"></select>
+<p style="margin-top: 15px;"><small>Or upload a new image:</small></p>
+<input type="file" id="sceneImageUpload" accept="image/*">
+<div style="margin-top: 10px;">
+<img id="imagePreview" src="" style="max-width: 300px; max-height: 300px; display: none; border: 1px solid #ccc;">
+</div>
+<h3 style="margin-top: 20px;">Choices</h3>
+<div id="choicesContainer"></div>
+<button type="submit" id="saveSceneBtn">Save Scene Data</button>
+<button type="button" id="deleteSceneBtn">Delete Scene</button>
+</form>
+</div>
+</div>
+<script>
+let GAME_DATA = {
+startSceneId: "start_scene",
+scenes: {},
+images: {}
+};
+let CURRENT_SCENE_ID = null;
+const IMAGE_WIDTH = 600;
+const IMAGE_HEIGHT = 600;
+function generateUniqueId() {
+return 'scene_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+}
+function loadData() {
+const savedData = localStorage.getItem('vn_editor_data');
+if (savedData) {
+GAME_DATA = JSON.parse(savedData);
+}
+if (!GAME_DATA.images) {
+GAME_DATA.images = {};
+}
+for (const sceneId in GAME_DATA.scenes) {
+const scene = GAME_DATA.scenes[sceneId];
+if (!scene.name) {
+scene.name = sceneId;
+}
+if (scene.choices) {
+scene.choices.forEach(choice => {
+if (choice.enabled === undefined) {
+choice.enabled = true;
+}
+});
+}
+}
+if (!GAME_DATA.startSceneId || !GAME_DATA.scenes[GAME_DATA.startSceneId]) {
+const sceneKeys = Object.keys(GAME_DATA.scenes);
+if (sceneKeys.length > 0) {
+GAME_DATA.startSceneId = sceneKeys[0];
+} else {
+GAME_DATA.startSceneId = "start_scene";
+}
+}
+if (Object.keys(GAME_DATA.scenes).length === 0) {
+GAME_DATA.scenes["start_scene"] = {
+name: "Welcome Scene",
+text: "Welcome to your new visual novel!",
+image: "",
+choices: [{
+text: "End Game",
+targetSceneId: "END",
+enabled: true
+}]
+};
+}
+saveData();
+renderUI();
+}
+function saveData() {
+localStorage.setItem('vn_editor_data', JSON.stringify(GAME_DATA));
+}
+function renderSceneList() {
+const listElement = document.getElementById('sceneList');
+const startSelectElement = document.getElementById('startSceneSelect');
+listElement.innerHTML = '';
+startSelectElement.innerHTML = '';
+const sceneIds = Object.keys(GAME_DATA.scenes).sort((a, b) => {
+return GAME_DATA.scenes[a].name.toLowerCase().localeCompare(GAME_DATA.scenes[b].name.toLowerCase());
+});
+sceneIds.forEach(id => {
+const scene = GAME_DATA.scenes[id];
+const li = document.createElement('li');
+li.textContent = `${scene.name} (${id})${id === GAME_DATA.startSceneId ? ' (START)' : ''}`;
+if (id === CURRENT_SCENE_ID) li.classList.add('active');
+li.onclick = () => selectScene(id);
+listElement.appendChild(li);
+const option = document.createElement('option');
+option.value = id;
+option.textContent = scene.name;
+option.selected = (id === GAME_DATA.startSceneId);
+startSelectElement.appendChild(option);
+});
+startSelectElement.onchange = () => {
+GAME_DATA.startSceneId = startSelectElement.value;
+saveData();
+renderSceneList();
+};
+}
+function renderSceneEditor(sceneId) {
+const form = document.getElementById('sceneForm');
+const noScene = document.getElementById('noSceneSelectedText');
+const currentIdDisplay = document.getElementById('currentSceneIdDisplay');
+if (!sceneId || !GAME_DATA.scenes[sceneId]) {
+form.style.display = 'none';
+noScene.style.display = 'block';
+return;
+}
+form.style.display = 'block';
+noScene.style.display = 'none';
+currentIdDisplay.textContent = sceneId;
+const scene = GAME_DATA.scenes[sceneId];
+document.getElementById('sceneName').value = scene.name;
+document.getElementById('sceneText').value = scene.text;
+const gallery = document.getElementById('imageGallerySelect');
+gallery.innerHTML = '<option value="">-- No Image --</option>';
+for (const imgId in GAME_DATA.images) {
+const opt = document.createElement('option');
+opt.value = imgId;
+opt.textContent = `Image ${imgId}`;
+gallery.appendChild(opt);
+}
+gallery.value = scene.image || '';
+const preview = document.getElementById('imagePreview');
+if (scene.image && GAME_DATA.images[scene.image]) {
+preview.src = GAME_DATA.images[scene.image];
+preview.style.display = 'block';
+} else {
+preview.style.display = 'none';
+}
+const container = document.getElementById('choicesContainer');
+container.innerHTML = '';
+for (let i = 0; i < 3; i++) {
+const choice = scene.choices[i] || {
+text: '',
+targetSceneId: '',
+enabled: true
+};
+const div = document.createElement('div');
+div.className = 'choice-group';
+div.innerHTML = `
+          <label>Choice ${i + 1} Text:</label>
+          <input type="text" value="${choice.text}" oninput="updateChoice(${i}, 'text', this.value)">
+          <label>Target:</label>
+          <select onchange="updateChoice(${i}, 'targetSceneId', this.value)">
+            <option value="">-- None --</option>
+            <option value="END" ${choice.targetSceneId === 'END' ? 'selected' : ''}>END GAME</option>
+            ${Object.keys(GAME_DATA.scenes).map(id => `<option value="${id}" ${choice.targetSceneId === id ? 'selected' : ''}>${GAME_DATA.scenes[id].name}</option>`).join('')}
+</select>
+`;
+          container.appendChild(div);
+        }
+      }
+
+      function updateChoice(index, field, value) {
+        if (!GAME_DATA.scenes[CURRENT_SCENE_ID].choices[index]) {
+          GAME_DATA.scenes[CURRENT_SCENE_ID].choices[index] = {
+            text: '',
+            targetSceneId: '',
+            enabled: true
+          };
+        }
+        GAME_DATA.scenes[CURRENT_SCENE_ID].choices[index][field] = value;
+        saveData();
+      }
+
+      function renderUI() {
+        renderSceneList();
+        renderSceneEditor(CURRENT_SCENE_ID);
+      }
+
+      function selectScene(id) {
+        CURRENT_SCENE_ID = id;
+        renderUI();
+      }
+
+      function handleAddScene() {
+        const id = generateUniqueId();
+        GAME_DATA.scenes[id] = {
+          name: "New Scene",
+          text: "Scene description here",
+          image: "",
+          choices: []
+        };
+        CURRENT_SCENE_ID = id;
+        saveData();
+        renderUI();
+      }
+
+      function handleDeleteScene() {
+        if (CURRENT_SCENE_ID === GAME_DATA.startSceneId) return alert("Cannot delete start scene");
+        delete GAME_DATA.scenes[CURRENT_SCENE_ID];
+        CURRENT_SCENE_ID = GAME_DATA.startSceneId;
+        saveData();
+        renderUI();
+      }
+
+      function handleSaveScene(e) {
+        e.preventDefault();
+        const scene = GAME_DATA.scenes[CURRENT_SCENE_ID];
+        scene.name = document.getElementById('sceneName').value;
+        scene.text = document.getElementById('sceneText').value;
+        saveData();
+        renderUI();
+      }
+
+      function processAndSaveImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = IMAGE_WIDTH;
+            canvas.height = IMAGE_HEIGHT;
+            canvas.getContext('2d').drawImage(img, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+            const id = generateUniqueId();
+            GAME_DATA.images[id] = canvas.toDataURL('image/jpeg', 0.5);
+            GAME_DATA.scenes[CURRENT_SCENE_ID].image = id;
+            saveData();
+            renderUI();
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function getGameHtmlTemplate() {
+        const dataStr = JSON.stringify(GAME_DATA);
+        return `<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { background: #1a1a1a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.container { width: 90%; max-width: 1000px; display: flex; gap: 20px; background: #222; padding: 20px; border-radius: 10px; }
+img { width: 400px; height: 400px; object-fit: cover; border-radius: 8px; }
+.content { flex: 1; }
+button { display: block; width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; background: #5e8dff; color: white; border: none; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="container">
+<img id="img">
+<div class="content">
+<p id="txt"></p>
+<div id="btns"></div>
+</div>
+</div>
+<script>
+const data = ${dataStr};
+function play(id) {
+if (id === 'END') { document.body.innerHTML = '<h1>THE END</h1>'; return; }
+const s = data.scenes[id];
+document.getElementById('txt').textContent = s.text;
+document.getElementById('img').src = data.images[s.image] || '';
+const b = document.getElementById('btns');
+b.innerHTML = '';
+s.choices.forEach(c => {
+if (!c.text) return;
+const btn = document.createElement('button');
+btn.textContent = c.text;
+btn.onclick = () => play(c.targetSceneId);
+b.appendChild(btn);
+});
+}
+play(data.startSceneId);
+<\/script>
+</body>
+</html>`;
+      }
+
+      function handleGenerateGame() {
+        const html = getGameHtmlTemplate();
+        const blob = new Blob([html], {
+          type: 'text/html'
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'game.html';
+        a.click();
+      }
+
+      function handleExportProject() {
+        const blob = new Blob([JSON.stringify(GAME_DATA, null, 2)], {
+          type: 'application/json'
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'project.json';
+        a.click();
+      }
+
+      function handleImportProject(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          GAME_DATA = JSON.parse(ev.target.result);
+          saveData();
+          loadData();
+        };
+        reader.readAsText(e.target.files[0]);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        document.getElementById('addSceneBtn').onclick = handleAddScene;
+        document.getElementById('sceneForm').onsubmit = handleSaveScene;
+        document.getElementById('deleteSceneBtn').onclick = handleDeleteScene;
+        document.getElementById('generateGameBtn').onclick = handleGenerateGame;
+        document.getElementById('exportProjectBtn').onclick = handleExportProject;
+        document.getElementById('importProjectInput').onchange = handleImportProject;
+        document.getElementById('sceneImageUpload').onchange = (e) => processAndSaveImage(e.target.files[0]);
+        document.getElementById('imageGallerySelect').onchange = (e) => {
+          GAME_DATA.scenes[CURRENT_SCENE_ID].image = e.target.value;
+          saveData();
+          renderUI();
+        };
+        document.getElementById('newGameBtn').onclick = () => {
+          if (confirm("Clear all?")) {
+            localStorage.removeItem('vn_editor_data');
+            location.reload();
+          }
+        };
+      });
+    </script>
+
+  </body>
+</html>

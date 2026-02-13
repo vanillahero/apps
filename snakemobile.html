@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Snake Arcade Mobile Game</title>
+<meta name="description" content="Classic retro snake action with neon visuals. Level up, dodge obstacles, and beat high scores on mobile.">
+<script src="widget.js" async></script>
+<style>
+:root {
+--bg-color: #121212;
+--primary-text: #e0e0e0;
+--border-color: #00ffff;
+--snake-head: #ff00ff;
+--snake-body: #00ff00;
+--obstacle-color: Red;
+--accent-color: #ff7f50;
+}
+@keyframes text-flicker {
+0% {
+opacity: 0.1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+2% {
+opacity: 1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+8% {
+opacity: 0.1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+9% {
+opacity: 1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+12% {
+opacity: 0.1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+20% {
+opacity: 1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+25% {
+opacity: 0.3;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+30% {
+opacity: 1;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+70% {
+opacity: 0.7;
+text-shadow: 4px 4px 2px var(--snake-head);
+}
+72% {
+opacity: 0.2;
+text-shadow: 4px 4px 8px var(--snake-head);
+}
+77% {
+opacity: .9;
+text-shadow: 4px 4px 8px var(--snake-head);
+}
+100% {
+opacity: .9;
+text-shadow: 4px 4px 8px var(--snake-head);
+}
+}
+@keyframes score-pop {
+0% {
+transform: scale(1);
+}
+50% {
+transform: scale(1.5);
+color: var(--accent-color);
+}
+100% {
+transform: scale(1);
+}
+}
+.score-updated {
+animation: score-pop 0.3s ease-in-out;
+display: inline-block;
+}
+@keyframes canvas-flash {
+0% {
+box-shadow: 0 0 20px var(--border-color);
+}
+50% {
+box-shadow: 0 0 40px var(--accent-color), 0 0 60px var(--accent-color) inset;
+}
+100% {
+box-shadow: 0 0 20px var(--border-color);
+}
+}
+.level-up-flash {
+animation: canvas-flash 0.5s ease-out;
+}
+body {
+color: var(--primary-text);
+font-family: "Courier New", Courier, monospace;
+margin: 0;
+overflow: hidden;
+background-color: var(--bg-color);
+image-rendering: pixelated;
+-webkit-user-select: none;
+-ms-user-select: none;
+user-select: none;
+-webkit-tap-highlight-color: transparent;
+}
+body::before {
+content: '';
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100vh;
+z-index: -1;
+background-image: url("data:image/svg+xml,<svg width='40' height='40' xmlns='http://www.w3.org/2000/svg'><rect width='40' height='40' fill='%23030328'/><path d='M40 0v40H0' fill='none' stroke='%2300d1ff' stroke-width='0.5'/></svg>");
+background-size: 40px;
+background-repeat: repeat;
+background-position: top;
+opacity: 0.90;
+filter: blur(0px);
+}
+#game-container {
+display: flex;
+flex-direction: column;
+width: 100vw;
+height: 100vh;
+background-color: #000;
+position: relative;
+}
+#game-area {
+flex-grow: 1;
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+align-items: center;
+position: relative;
+height: 100%;
+width: 100%;
+box-sizing: border-box;
+}
+canvas {
+background-color: #000;
+}
+#ui-top {
+display: flex;
+justify-content: space-around;
+width: 100%;
+padding: 10px 0;
+font-size: 1em;
+text-shadow: 2px 2px var(--snake-head);
+letter-spacing: 2px;
+margin-top: 20px;
+margin-bottom: 10px;
+}
+.overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.7);
+backdrop-filter: blur(5px);
+display: none;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+z-index: 20;
+padding: 20px;
+box-sizing: border-box;
+}
+.overlay.visible {
+display: flex;
+}
+.overlay h1 {
+font-size: 3em;
+color: var(--border-color);
+text-shadow: 4px 4px var(--snake-head);
+margin-bottom: 20px;
+animation: text-flicker 4s linear infinite;
+}
+.overlay h2 {
+font-size: 2em;
+color: var(--accent-color);
+text-shadow: 3px 3px var(--bg-color);
+margin-bottom: 20px;
+}
+button {
+font-family: "Courier New", Courier, monospace;
+font-size: 1em;
+padding: 15px 30px;
+margin: 10px;
+border: 2px solid var(--primary-text);
+background-color: transparent;
+color: var(--primary-text);
+cursor: pointer;
+transition: all 0.2s ease-in-out;
+border-radius: 0;
+width: 80%;
+max-width: 300px;
+text-transform: uppercase;
+}
+button:hover {
+background-color: var(--accent-color);
+color: var(--bg-color);
+border-color: var(--accent-color);
+box-shadow: 0 0 15px var(--accent-color);
+transform: scale(1.05);
+}
+#player-name-input {
+font-family: "Courier New", Courier, monospace;
+text-align: center;
+font-size: 1em;
+padding: 10px;
+margin: 10px 0;
+width: calc(80% - 24px);
+max-width: 276px;
+background-color: var(--bg-color);
+border: 2px solid var(--border-color);
+color: var(--primary-text);
+text-transform: uppercase;
+}
+#player-name-input::placeholder {
+color: #666;
+}
+.instructions {
+margin: 20px 0;
+font-size: 0.9em;
+color: var(--accent-color);
+text-shadow: 1px 1px #000;
+}
+#start-screen-highscores {
+margin-top: 30px;
+width: 80%;
+max-width: 300px;
+}
+#start-screen-highscores h3 {
+color: var(--border-color);
+font-size: 1.1em;
+margin-bottom: 10px;
+text-align: center;
+}
+#start-screen-highscore-list {
+list-style: none;
+padding: 0;
+font-size: 0.9em;
+}
+#start-screen-highscore-list li {
+display: flex;
+justify-content: space-between;
+margin-bottom: 8px;
+padding: 0 10px;
+}
+#start-screen-highscore-list .score {
+color: var(--obstacle-color);
+font-weight: bold;
+}
+.hidden {
+display: none !important;
+}
+#canvas-wrapper {
+flex-grow: 1;
+width: 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 0;
+}
+#controls-container {
+margin-top: 15px;
+margin-bottom: 20px;
+display: grid;
+grid-template-columns: 70px 70px 70px;
+grid-template-rows: 70px 70px;
+gap: 8px;
+justify-content: center;
+}
+.control-button {
+font-family: "Courier New", Courier, monospace;
+font-size: 2.5em;
+border: 2px solid var(--border-color);
+background-color: rgba(0, 255, 255, 0.1);
+color: var(--border-color);
+cursor: pointer;
+border-radius: 50%;
+width: 70px;
+height: 70px;
+padding: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+user-select: none;
+-webkit-user-select: none;
+}
+.control-button:active {
+background-color: var(--accent-color);
+transform: scale(0.95);
+}
+#up-button {
+grid-column: 2;
+grid-row: 1;
+}
+#left-button {
+grid-column: 1;
+grid-row: 2;
+}
+#down-button {
+grid-column: 2;
+grid-row: 2;
+}
+#right-button {
+grid-column: 3;
+grid-row: 2;
+}
+#rotate-message {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  color: #0f0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  text-align: center;
+}
+
+#rotate-message svg {
+  width: 64px;
+  height: 64px;
+  fill: #0f0;
+  margin-bottom: 20px;
+  animation: rotate-to-portrait 2s infinite ease-in-out;
+}
+
+@keyframes rotate-to-portrait {
+  0%,
+  100% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (orientation: landscape) {
+  #rotate-message {
+    display: flex;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="rotate-message">
+<svg viewBox="0 0 24 24">
+<path d="M17,1.01L7,1C5.9,1 5,1.9 5,3v18c0,1.1 0.9,2 2,2h10c1.1,0 2,-0.9 2,-2V3C19,1.9 18.1,1.01 17,1.01z M17,21H7l0,-1h10V21z M17,18H7V6h10V18z M7,4V3h10v1H7z" />
+</svg>
+<p>PLEASE ROTATE DEVICE</p>
+</div>
+
+<div id="game-container">
+<div id="game-area">
+<div id="ui-top">
+<div id="score-container">SCORE: <span id="score-value">0</span></div>
+<div id="level-container">LEVEL: <span id="level-value">1</span></div>
+</div>
+<div id="canvas-wrapper">
+<canvas id="game-canvas"></canvas>
+</div>
+<div id="controls-container">
+<button class="control-button" id="up-button">▲</button>
+<button class="control-button" id="left-button">◄</button>
+<button class="control-button" id="down-button">▼</button>
+<button class="control-button" id="right-button">►</button>
+</div>
+<div id="start-screen" class="overlay visible">
+<h1>SNAKE</h1>
+<button style="display: block; margin: 0 auto 0 auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
+<p class="instructions">Use arrow buttons to control</p>
+<button id="start-button">Start Game</button>
+<div id="start-screen-highscores">
+<h3>TOP SCORES</h3>
+<ol id="start-screen-highscore-list"></ol>
+</div>
+</div>
+<div id="game-over-screen" class="overlay">
+<h2>GAME OVER</h2>
+<p>Your score: <span id="final-score">0</span></p>
+<p id="new-highscore-message" class="hidden">🏆 NEW HIGHSCORE! 🏆</p>
+<button id="play-again-button">Play Again</button>
+</div>
+<div id="pause-screen" class="overlay">
+<h1>PAUSED</h1>
+<p style="font-size: 0.8em; color: var(--primary-text);">Tap to Resume</p>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+'use strict';
+const GRID_SIZE = 20;
+const BASE_MOVE_INTERVAL = 400;
+const SPEED_INCREASE_PER_LEVEL = 15;
+const MIN_MOVE_INTERVAL = 50;
+const POINTS_PER_LEVEL = 150;
+const SPEED_BOOST_DURATION = 5000;
+const OBSTACLES_PER_LEVEL = 2;
+const GRAPE_CHANCE = 0.05;
+const CHERRY_CHANCE = 0.2;
+const FOOD_TYPES = {
+APPLE: {
+emoji: '🍎',
+points: 10,
+growth: 1,
+action: null
+},
+CHERRY: {
+emoji: '🍒',
+points: 50,
+growth: 3,
+action: null
+},
+GRAPE: {
+emoji: '🍇',
+points: 100,
+growth: 0,
+action: 'speedBoost'
+},
+};
+const HIGHSCORE_KEY = 'snakeHighScores_v4';
+const MAX_HIGHSCORES = 10;
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const scoreValue = document.getElementById('score-value');
+const levelValue = document.getElementById('level-value');
+const startScreen = document.getElementById('start-screen');
+const gameOverScreen = document.getElementById('game-over-screen');
+const pauseScreen = document.getElementById('pause-screen');
+const finalScore = document.getElementById('final-score');
+const newHighscoreMsg = document.getElementById('new-highscore-message');
+const startButton = document.getElementById('start-button');
+const playAgainButton = document.getElementById('play-again-button');
+const upButton = document.getElementById('up-button');
+const downButton = document.getElementById('down-button');
+const leftButton = document.getElementById('left-button');
+const rightButton = document.getElementById('right-button');
+const style = getComputedStyle(document.documentElement);
+const SNAKE_HEAD_COLOR = style.getPropertyValue('--snake-head').trim();
+const SNAKE_BODY_COLOR = style.getPropertyValue('--snake-body').trim();
+const OBSTACLE_COLOR = style.getPropertyValue('--obstacle-color').trim();
+const BORDER_COLOR = style.getPropertyValue('--border-color').trim();
+let canvasSize, cellSize;
+let snake, food, direction, nextDirection, obstacles, score, level;
+let gameOver, gameStarted, gameLoopId, isPaused;
+let highScores = [];
+let lastTime = 0;
+let moveTimer = 0;
+let currentMoveInterval = BASE_MOVE_INTERVAL;
+let speedBoostTimer = 0;
+let audioCtx;
+function playSound({
+frequency = 440,
+duration = 0.1,
+type = 'sine',
+volume = 0.5
+} = {}) {
+if (!audioCtx) return;
+const oscillator = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
+oscillator.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+oscillator.type = type;
+oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+oscillator.start(audioCtx.currentTime);
+oscillator.stop(audioCtx.currentTime + duration);
+}
+function initializeApp() {
+audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+setupEventListeners();
+highScores = loadHighScores();
+displayHighScores();
+resizeCanvas();
+}
+function addButtonSound(button, callback) {
+button.addEventListener('click', (e) => {
+playSound({
+frequency: 440,
+type: 'square',
+duration: 0.05,
+volume: 0.3
+});
+callback(e);
+});
+}
+function setupEventListeners() {
+addButtonSound(startButton, startGame);
+addButtonSound(playAgainButton, startGame);
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('resize', resizeCanvas);
+pauseScreen.addEventListener('click', togglePause);
+const handleControl = (e, newDirection) => {
+e.preventDefault();
+if (isPaused || gameOver) return;
+const opposite = {
+up: 'down',
+down: 'up',
+left: 'right',
+right: 'left'
+};
+if (direction !== opposite[newDirection]) {
+nextDirection = newDirection;
+}
+};
+upButton.addEventListener('touchstart', (e) => handleControl(e, 'up'), {
+passive: false
+});
+downButton.addEventListener('touchstart', (e) => handleControl(e, 'down'), {
+passive: false
+});
+leftButton.addEventListener('touchstart', (e) => handleControl(e, 'left'), {
+passive: false
+});
+rightButton.addEventListener('touchstart', (e) => handleControl(e, 'right'), {
+passive: false
+});
+}
+function resizeCanvas() {
+const canvasWrapper = document.getElementById('canvas-wrapper');
+if (!canvasWrapper) return;
+const availableWidth = canvasWrapper.clientWidth;
+const availableHeight = canvasWrapper.clientHeight;
+const size = Math.min(availableWidth, availableHeight) * 0.98;
+canvasSize = Math.floor(size / GRID_SIZE) * GRID_SIZE;
+if (canvasSize < GRID_SIZE) {
+canvas.width = 0;
+canvas.height = 0;
+return;
+}
+cellSize = canvasSize / GRID_SIZE;
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+if (gameStarted && !gameOver) {
+draw();
+}
+}
+function initGame() {
+level = 1;
+score = 0;
+direction = 'right';
+nextDirection = 'right';
+gameOver = false;
+gameStarted = true;
+isPaused = false;
+obstacles = [];
+snake = [{
+x: 10,
+y: 10
+}];
+currentMoveInterval = BASE_MOVE_INTERVAL;
+updateScoreAndLevelUI();
+spawnFood();
+gameOverScreen.classList.remove('visible');
+startScreen.classList.remove('visible');
+pauseScreen.classList.remove('visible');
+newHighscoreMsg.classList.add('hidden');
+}
+function startGame() {
+if (audioCtx.state === 'suspended') audioCtx.resume();
+playSound({
+frequency: 261.63,
+duration: 0.1,
+type: 'square'
+});
+setTimeout(() => playSound({
+frequency: 329.63,
+duration: 0.1,
+type: 'square'
+}), 120);
+setTimeout(() => playSound({
+frequency: 392.00,
+duration: 0.2,
+type: 'square'
+}), 240);
+if (gameLoopId) cancelAnimationFrame(gameLoopId);
+initGame();
+lastTime = performance.now();
+gameLoopId = requestAnimationFrame(gameLoop);
+}
+function togglePause() {
+if (gameOver || !gameStarted) return;
+isPaused = !isPaused;
+if (isPaused) {
+pauseScreen.classList.add('visible');
+cancelAnimationFrame(gameLoopId);
+} else {
+pauseScreen.classList.remove('visible');
+lastTime = performance.now();
+gameLoopId = requestAnimationFrame(gameLoop);
+}
+}
+function gameLoop(currentTime) {
+if (gameOver || isPaused) return;
+gameLoopId = requestAnimationFrame(gameLoop);
+const deltaTime = currentTime - lastTime;
+lastTime = currentTime;
+moveTimer += deltaTime;
+if (speedBoostTimer > 0) {
+speedBoostTimer -= deltaTime;
+if (speedBoostTimer <= 0) {
+speedBoostTimer = 0;
+updateMoveInterval();
+}
+}
+if (moveTimer > currentMoveInterval) {
+moveTimer %= currentMoveInterval;
+update();
+draw();
+}
+}
+function endGame() {
+gameOver = true;
+gameStarted = false;
+cancelAnimationFrame(gameLoopId);
+gameOverScreen.classList.add('visible');
+finalScore.textContent = score;
+playSound({
+frequency: 220,
+duration: 0.15,
+type: 'sawtooth'
+});
+setTimeout(() => playSound({
+frequency: 164,
+duration: 0.25,
+type: 'sawtooth'
+}), 150);
+const worstHighScore = highScores.length < MAX_HIGHSCORES ? 0 : highScores[highScores.length - 1];
+const isHighScore = score > 0 && score > worstHighScore;
+if (isHighScore) {
+newHighscoreMsg.classList.remove('hidden');
+saveHighScore(score);
+displayHighScores();
+} else {
+newHighscoreMsg.classList.add('hidden');
+}
+}
+function update() {
+direction = nextDirection;
+const head = {
+...snake[0]
+};
+if (direction === 'right') head.x++;
+if (direction === 'left') head.x--;
+if (direction === 'up') head.y--;
+if (direction === 'down') head.y++;
+if (checkCollision(head)) {
+endGame();
+return;
+}
+snake.unshift(head);
+if (head.x === food.x && head.y === food.y) {
+score += food.type.points;
+if (food.type.action === 'speedBoost') {
+speedBoostTimer = SPEED_BOOST_DURATION;
+updateMoveInterval();
+playSound({
+frequency: 880,
+type: 'sawtooth',
+duration: 0.2
+});
+} else if (food.type.growth > 1) {
+playSound({
+frequency: 660,
+type: 'triangle',
+duration: 0.15
+});
+} else {
+playSound({
+frequency: 440,
+type: 'sine',
+duration: 0.1
+});
+}
+const growth = food.type.growth;
+if (growth > 0) {
+const tail = snake[snake.length - 1];
+for (let i = 0; i < growth; i++) snake.push({
+...tail
+});
+}
+const newLevel = Math.floor(score / POINTS_PER_LEVEL) + 1;
+if (newLevel > level) levelUp(newLevel);
+updateScoreAndLevelUI();
+spawnFood();
+} else {
+snake.pop();
+}
+}
+function levelUp(newLevel) {
+level = newLevel;
+updateMoveInterval();
+generateObstacles();
+playSound({
+frequency: 523.25,
+duration: 0.05,
+type: 'square'
+});
+setTimeout(() => playSound({
+frequency: 1046.50,
+duration: 0.1,
+type: 'square'
+}), 100);
+canvas.classList.add('level-up-flash');
+setTimeout(() => canvas.classList.remove('level-up-flash'), 500);
+}
+function updateMoveInterval() {
+const baseInterval = BASE_MOVE_INTERVAL - (level - 1) * SPEED_INCREASE_PER_LEVEL;
+let interval = Math.max(MIN_MOVE_INTERVAL, baseInterval);
+if (speedBoostTimer > 0) interval /= 2;
+currentMoveInterval = interval;
+}
+function checkCollision(head) {
+if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) return true;
+for (let i = 1; i < snake.length; i++) {
+if (head.x === snake[i].x && head.y === snake[i].y) return true;
+}
+return isPositionOccupied(head.x, head.y, false);
+}
+function spawnFood() {
+if (snake.length + obstacles.length >= GRID_SIZE * GRID_SIZE) {
+endGame();
+return;
+}
+let position;
+do {
+position = {
+x: getRandomCoord(),
+y: getRandomCoord()
+};
+} while (isPositionOccupied(position.x, position.y) || isTooCloseToObstacle(position.x, position.y, 3) || isTooCloseToSnakeHead(position.x, position.y, 3));
+const rand = Math.random();
+let chosenType;
+if (rand < GRAPE_CHANCE && level >= 3) chosenType = 'GRAPE';
+else if (rand < GRAPE_CHANCE + CHERRY_CHANCE) chosenType = 'CHERRY';
+else chosenType = 'APPLE';
+food = {
+...position,
+type: FOOD_TYPES[chosenType]
+};
+}
+function generateObstacles() {
+for (let i = 0; i < OBSTACLES_PER_LEVEL; i++) {
+if (snake.length + obstacles.length >= GRID_SIZE * GRID_SIZE) break;
+let pos;
+do {
+pos = {
+x: getRandomCoord(),
+y: getRandomCoord()
+};
+} while (isPositionOccupied(pos.x, pos.y) || (pos.x > 5 && pos.x < 15 && pos.y > 5 && pos.y < 15) || isTooCloseToSnakeHead(pos.x, pos.y, 3));
+obstacles.push(pos);
+}
+}
+function getRandomCoord() {
+return Math.floor(Math.random() * GRID_SIZE);
+}
+function isPositionOccupied(x, y, checkSnake = true) {
+if (obstacles.some((ob) => ob.x === x && ob.y === y)) return true;
+if (checkSnake && snake.some((seg) => seg.x === x && seg.y === y)) return true;
+return false;
+}
+function isTooCloseToObstacle(x, y, minDistance) {
+for (const ob of obstacles) {
+const distance = Math.abs(x - ob.x) + Math.abs(y - ob.y);
+if (distance < minDistance) return true;
+}
+return false;
+}
+function isTooCloseToSnakeHead(x, y, minDistance) {
+const head = snake[0];
+const distance = Math.abs(x - head.x) + Math.abs(y - head.y);
+return distance < minDistance;
+}
+function draw() {
+ctx.fillStyle = '#000';
+ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+ctx.fillStyle = OBSTACLE_COLOR;
+obstacles.forEach((ob) => {
+ctx.fillRect(ob.x * cellSize, ob.y * cellSize, cellSize, cellSize);
+});
+
+ctx.font = `${cellSize * 0.9}px "Courier New"`;
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText(food.type.emoji, food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2.6);
+
+snake.forEach((segment, index) => {
+ctx.fillStyle = index === 0 ? SNAKE_HEAD_COLOR : SNAKE_BODY_COLOR;
+ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+});
+
+ctx.strokeStyle = BORDER_COLOR;
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+ctx.moveTo(0, 1);
+ctx.lineTo(canvasSize, 1);
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(0, canvasSize - 1);
+ctx.lineTo(canvasSize, canvasSize - 1);
+ctx.stroke();
+}
+function handleKeyDown(e) {
+if (gameOver) return;
+const key = e.key;
+if (key.toLowerCase() === 'p') {
+togglePause();
+return;
+}
+if (isPaused) return;
+if ((key === 'ArrowUp' || key.toLowerCase() === 'w') && direction !== 'down') nextDirection = 'up';
+else if ((key === 'ArrowDown' || key.toLowerCase() === 's') && direction !== 'up') nextDirection = 'down';
+else if ((key === 'ArrowLeft' || key.toLowerCase() === 'a') && direction !== 'right') nextDirection = 'left';
+else if ((key === 'ArrowRight' || key.toLowerCase() === 'd') && direction !== 'left') nextDirection = 'right';
+}
+function updateScoreAndLevelUI() {
+scoreValue.textContent = score;
+scoreValue.classList.add('score-updated');
+setTimeout(() => scoreValue.classList.remove('score-updated'), 300);
+levelValue.textContent = level;
+}
+function loadHighScores() {
+const scoresJSON = localStorage.getItem(HIGHSCORE_KEY);
+const scores = scoresJSON ? JSON.parse(scoresJSON) : [];
+return scores.sort((a, b) => b - a);
+}
+function saveHighScore(score) {
+highScores.push(score);
+highScores.sort((a, b) => b - a);
+highScores = highScores.slice(0, MAX_HIGHSCORES);
+localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(highScores));
+}
+function displayHighScores() {
+const list = document.getElementById('start-screen-highscore-list');
+list.innerHTML = '';
+const topScores = highScores.slice(0, 3);
+if (topScores.length === 0) {
+const li = document.createElement('li');
+li.textContent = 'NO SCORES YET';
+li.style.justifyContent = 'center';
+list.appendChild(li);
+return;
+}
+topScores.forEach((score, index) => {
+const li = document.createElement('li');
+li.innerHTML = `<span>#${index + 1}</span><span class="score">${score}</span>`;
+list.appendChild(li);
+});
+}
+initializeApp();
+});
+</script>
+<script>
+window.addEventListener('keydown', (e) => {
+if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+e.preventDefault();
+}
+}, false);
+</script>
+</body>
+</html>

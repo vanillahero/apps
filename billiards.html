@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8-Ball Billiards | Pro Pool Simulator</title>
+<meta name="description" content="Play the ultimate 8-ball pool game. Challenge a smart AI, master your shots, and clear the table to win.">
+<script src="widget.js" async></script>
+<style>
+:root {
+--table-felt: #008080;
+--table-rail: #8d6e63;
+--background-start: #2a5298;
+--background-end: #1e3c72;
+--text-color: #ffffff;
+--shadow-color: rgba(0, 0, 0, 0.3);
+--button-bg: #ff6d00;
+--button-hover-bg: #ff8124;
+}
+html,
+body {
+margin: 0;
+padding: 0;
+width: 100%;
+height: 100vh;
+overflow: hidden;
+background: linear-gradient(to top, var(--background-start), var(--background-end));
+display: flex;
+justify-content: center;
+align-items: top;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+color: var(--text-color);
+}
+#game-area {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+width: 100%;
+height: 97vh;
+position: relative;
+}
+#top-ui {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+width: 100%;
+max-width: 1200px;
+padding: 10px 0;
+flex-shrink: 0;
+}
+.pocketed-balls-area {
+width: 30%;
+min-height: 50px;
+background: rgba(0, 0, 0, 0.2);
+border-radius: 8px;
+padding: 8px;
+box-sizing: border-box;
+transition: all 0.3s ease;
+}
+.pocketed-balls-area h3 {
+margin: 0 0 8px 0;
+font-size: clamp(0.8rem, 2vw, 0.9rem);
+text-align: center;
+}
+.pocketed-balls-container {
+display: flex;
+flex-wrap: wrap;
+gap: 5px;
+min-height: 25px;
+}
+.pocketed-ball-display {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background-color: white;
+box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+.pocketed-ball-display.stripe {
+background-image: repeating-linear-gradient(-45deg,
+white,
+white 5px,
+var(--stripe-color) 5px,
+var(--stripe-color) 10px);
+}
+#header {
+text-align: center;
+color: var(--text-color);
+text-shadow: 0 2px 4px var(--shadow-color);
+flex-shrink: 0;
+width: 40%;
+position: relative;
+}
+#game-title {
+font-size: clamp(1.2rem, 3vw, 2rem);
+margin: 0 0 5px 0;
+}
+#game-status {
+font-size: clamp(0.9rem, 2vw, 0.9rem);
+min-height: 1.5em;
+margin-top: 5px;
+}
+#canvas-container {
+background: var(--table-rail);
+padding: 15px;
+border-radius: 15px;
+box-shadow: 0 10px 30px var(--shadow-color);
+}
+canvas {
+display: block;
+background: var(--table-felt);
+border-radius: 10px;
+cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cline x1='16' y1='4' x2='16' y2='12' stroke='black' stroke-width='3'/%3E%3Cline x1='16' y1='20' x2='16' y2='28' stroke='black' stroke-width='3'/%3E%3Cline x1='4' y1='16' x2='12' y2='16' stroke='black' stroke-width='3'/%3E%3Cline x1='20' y1='16' x2='28' y2='16' stroke='black' stroke-width='3'/%3E%3C/svg%3E") 16 16, crosshair;
+}
+.game-button {
+background-color: var(--button-bg);
+color: var(--text-color);
+border: none;
+border-radius: 8px;
+padding: 10px 20px;
+font-size: clamp(1rem, 2.5vw, 1.2rem);
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0 4px 15px var(--shadow-color);
+transition: all 0.2s ease-in-out;
+}
+.game-button:hover {
+background-color: var(--button-hover-bg);
+transform: translateY(-2px);
+}
+#play-again-btn {
+position: absolute;
+top: 120px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 100;
+display: none;
+}
+#how-to-play-btn {
+padding: 6px 12px;
+font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+margin-bottom: 5px;
+}
+#rules-modal {
+display: none;
+position: fixed;
+z-index: 200;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: auto;
+background-color: rgba(0, 0, 0, 0.6);
+padding-top: 10px;
+}
+.modal-content {
+background: linear-gradient(to bottom, var(--background-start), var(--background-end));
+margin: 0 auto;
+padding: 15px;
+border: 1px solid var(--table-rail);
+border-radius: 10px;
+width: 100%;
+max-width: 900px;
+position: relative;
+}
+.modal-content h2 {
+margin-top: 0;
+color: var(--button-bg);
+}
+.modal-content p,
+.modal-content li {
+line-height: 1.4;
+}
+.close-btn {
+color: #aaa;
+position: absolute;
+top: 10px;
+right: 25px;
+font-size: 35px;
+font-weight: bold;
+cursor: pointer;
+}
+.close-btn:hover,
+.close-btn:focus {
+color: white;
+}
+</style>
+</head>
+<body>
+<div id="rules-modal">
+<div class="modal-content">
+<span class="close-btn">&times;</span>
+<button style="display: block; margin: 0 auto 10px auto; background: transparent; border: 1px solid lightblue; color: cornflowerblue; padding: 5px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
+<p>
+<img style="width: 300px; margin: 10px; border-radius: 8px;" align="right" src="data:image/jpeg;base64,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">
+<strong>Objective:</strong> Be the first player to pocket all of your assigned balls (solids or stripes) and
+then legally pocket the 8-ball.
+</p>
+<h3>Controls</h3>
+<p>Drag the mouse on the table to aim and set power. The white dashed line shows where the cue ball will go, and
+the yellow line shows the direction the object ball will take. The farther you drag, the harder the shot.
+Release the mouse button to shoot.</p>
+<h3>Gameplay</h3>
+<ul>
+<li><strong>Assigning Groups:</strong> The table is "open" at the start. The first player to legally pocket a
+ball will be assigned that ball's group (e.g., pocket a solid-colored ball to become solids).</li>
+<li><strong>Turns:</strong> You continue your turn as long as you legally pocket one of your own balls.</li>
+<li>
+<strong>Fouls:</strong> If you commit a foul, your turn ends, and the opponent gets "ball in hand." Fouls
+include:
+<ul>
+<li>Pocketing the cue ball (a "scratch").</li>
+<li>Hitting an opponent's ball or the 8-ball before your own.</li>
+<li>Failing to hit any ball with the cue ball.</li>
+<li>After contact, if no ball is pocketed, some ball (any ball) must hit a rail.</li>
+</ul>
+</li>
+<li><strong>Ball in Hand:</strong> After a foul, the opponent can place the cue ball anywhere on the table. If
+the foul occurs on the break shot, placement must be behind the head string (the first quarter of the table).
+</li>
+<li><strong>Winning/Losing:</strong> You win by pocketing the 8-ball after all of your other balls are gone. You
+lose if you pocket the 8-ball too early or commit a foul (like a scratch) on the final 8-ball shot.</li>
+</ul>
+</div>
+</div>
+<div id="game-area">
+<div id="top-ui">
+<div id="player-pocketed-area" class="pocketed-balls-area">
+<h3>Player's Balls</h3>
+<div id="player-pocketed-container" class="pocketed-balls-container"></div>
+</div>
+<div id="header">
+<button id="how-to-play-btn" class="game-button">How to Play</button>
+<p id="game-status">Setting up the table...</p>
+<button id="play-again-btn" class="game-button">Play Again</button>
+</div>
+<div id="ai-pocketed-area" class="pocketed-balls-area">
+<h3>AI's Balls</h3>
+<div id="ai-pocketed-container" class="pocketed-balls-container"></div>
+</div>
+</div>
+<div id="canvas-container">
+<canvas id="pool-canvas"></canvas>
+</div>
+</div>
+<script>
+window.addEventListener('load', () => {
+const canvas = document.getElementById('pool-canvas');
+const ctx = canvas.getContext('2d');
+const statusDisplay = document.getElementById('game-status');
+const playerPocketedContainer = document.getElementById('player-pocketed-container');
+const aiPocketedContainer = document.getElementById('ai-pocketed-container');
+const playAgainBtn = document.getElementById('play-again-btn');
+const rulesModal = document.getElementById('rules-modal');
+const howToPlayBtn = document.getElementById('how-to-play-btn');
+const closeModalBtn = document.querySelector('.close-btn');
+const Sound = {
+audioCtx: null,
+masterVolume: null,
+init() {
+const createContextOnce = () => {
+if (this.audioCtx) return;
+try {
+this.audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+this.masterVolume = this.audioCtx.createGain();
+this.masterVolume.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
+this.masterVolume.connect(this.audioCtx.destination);
+} catch (e) {
+console.error("Web Audio API is not supported in this browser");
+}
+};
+canvas.addEventListener('mousedown', createContextOnce, {
+once: true
+});
+},
+_playTone(freq, type, vol, duration, attack = 0.01, decay = 0.1, freqSweep = 0) {
+if (!this.audioCtx) return;
+const t = this.audioCtx.currentTime;
+const osc = this.audioCtx.createOscillator();
+const gain = this.audioCtx.createGain();
+osc.type = type;
+osc.frequency.setValueAtTime(freq, t);
+if (freqSweep !== 0) {
+osc.frequency.exponentialRampToValueAtTime(freq + freqSweep, t + duration);
+}
+gain.gain.setValueAtTime(0, t);
+gain.gain.linearRampToValueAtTime(vol, t + attack);
+gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+osc.connect(gain);
+gain.connect(this.masterVolume);
+osc.start(t);
+osc.stop(t + duration);
+},
+playShot(volume) {
+const vol = Math.min(1, Math.max(0, volume)) * 0.8;
+this._playTone(2500, 'sine', vol, 0.03, 0.001, 0.02, -1500);
+},
+playBallCollision(volume) {
+const vol = Math.min(1, Math.max(0, volume)) * 0.6;
+if (vol < 0.05) return;
+this._playTone(2500, 'sine', vol, 0.03, 0.001, 0.02, -1500);
+},
+playRailHit(volume) {
+const vol = Math.min(1, Math.max(0, volume)) * 0.5;
+if (vol < 0.05) return;
+this._playTone(440, 'sine', vol, 0.15, 0.01, 0.1, -100);
+},
+playPocket() {
+this._playTone(220, 'sine', 0.7, 0.3, 0.01, 0.2, -50);
+},
+playWin() {
+this._playTone(523.25, 'sine', 0.4, 0.15, 0.01, 0.1);
+setTimeout(() => this._playTone(659.25, 'sine', 0.4, 0.15, 0.01, 0.1), 150);
+setTimeout(() => this._playTone(783.99, 'sine', 0.4, 0.15, 0.01, 0.1), 300);
+setTimeout(() => this._playTone(1046.50, 'sine', 0.5, 0.3, 0.01, 0.2), 450);
+},
+playLose() {
+this._playTone(440, 'sawtooth', 0.3, 0.2, 0.01, 0.15, -100);
+setTimeout(() => this._playTone(330, 'sawtooth', 0.3, 0.3, 0.01, 0.25, -100), 200);
+},
+playClick() {
+const vol = 0.3;
+this._playTone(2500, 'sine', vol, 0.03, 0.001, 0.02, -1500);
+}
+};
+let balls = [],
+pockets = [];
+const player = {
+name: 'Player',
+ballType: null
+};
+const ai = {
+name: 'AI',
+ballType: null
+};
+let gameState = 'LOADING';
+class Vector {
+constructor(x = 0, y = 0) {
+this.x = x;
+this.y = y;
+}
+add(v) {
+return new Vector(this.x + v.x, this.y + v.y);
+}
+subtract(v) {
+return new Vector(this.x - v.x, this.y - v.y);
+}
+multiply(s) {
+return new Vector(this.x * s, this.y * s);
+}
+magnitude() {
+return Math.sqrt(this.x ** 2 + this.y ** 2);
+}
+normalize() {
+const m = this.magnitude();
+return m > 0 ? new Vector(this.x / m, this.y / m) : new Vector();
+}
+dot(v) {
+return this.x * v.x + this.y * v.y;
+}
+}
+class Ball {
+constructor(pos, number) {
+this.pos = pos;
+this.vel = new Vector();
+this.number = number;
+this.radius = 0;
+this.isSunk = false;
+this.hitRail = false;
+if (number === 0) this.type = 'cue';
+else if (number === 8) this.type = '8ball';
+else if (number > 0 && number < 8) this.type = 'solid';
+else if (number > 8 && number <= 15) this.type = 'stripe';
+else this.type = 'invalid';
+this.baseColor = this.getColor();
+this.displayColor = this.baseColor;
+}
+getColor() {
+const colors = {
+0: '#ffffff',
+1: '#ffca28',
+2: '#2962ff',
+3: '#d50000',
+4: '#6200ea',
+5: '#ff6d00',
+6: '#00c853',
+7: '#c51162',
+8: '#212121',
+9: '#ffca28',
+10: '#2962ff',
+11: '#d50000',
+12: '#6200ea',
+13: '#ff6d00',
+14: '#00c853',
+15: '#c51162'
+};
+return colors[this.number] || '#ff00ff';
+}
+draw() {
+if (this.isSunk || this.type === 'invalid') return;
+ctx.save();
+ctx.shadowColor = 'rgba(0,0,0,0.3)';
+ctx.shadowBlur = this.radius * 0.3;
+ctx.shadowOffsetX = this.radius * 0.1;
+ctx.shadowOffsetY = this.radius * 0.2;
+ctx.beginPath();
+ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+ctx.fillStyle = this.displayColor;
+if (this.type === 'cue' && gameState === 'BALL_IN_HAND' && Game.currentPlayer === player) {
+ctx.globalAlpha = 0.7;
+}
+ctx.fill();
+ctx.globalAlpha = 1;
+if (this.type === 'stripe') {
+ctx.fillStyle = 'white';
+ctx.save();
+ctx.clip();
+ctx.fillRect(this.pos.x - this.radius, this.pos.y - this.radius * 0.5, this.radius * 2, this.radius);
+ctx.restore();
+}
+let shadeGradient = ctx.createRadialGradient(this.pos.x, this.pos.y, this.radius * 0.1, this.pos.x, this.pos.y, this.radius);
+shadeGradient.addColorStop(0, 'rgba(0,0,0,0.05)');
+shadeGradient.addColorStop(0.7, 'rgba(0,0,0,0.3)');
+shadeGradient.addColorStop(1, 'rgba(0,0,0,0.5)');
+ctx.fillStyle = shadeGradient;
+ctx.fill();
+let highlightGradient = ctx.createRadialGradient(this.pos.x - this.radius * 0.4, this.pos.y - this.radius * 0.5, this.radius * 0.05, this.pos.x, this.pos.y, this.radius);
+highlightGradient.addColorStop(0, 'rgba(255,255,255,0.7)');
+highlightGradient.addColorStop(0.3, 'rgba(255,255,255,0)');
+ctx.fillStyle = highlightGradient;
+ctx.fill();
+ctx.restore();
+}
+}
+class Pocket {
+constructor(pos, isCorner) {
+this.pos = pos;
+this.isCorner = isCorner;
+this.radius = 0;
+}
+draw() {
+ctx.beginPath();
+ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
+ctx.fillStyle = 'rgba(0,0,0,0.5)';
+ctx.fill();
+}
+}
+const Physics = {
+shotData: {},
+update(deltaTime) {
+if (!deltaTime || deltaTime <= 0) return;
+const timeCorrection = deltaTime * 60;
+const iterations = 5;
+for (let iter = 0; iter < iterations; iter++) {
+balls.forEach(b => {
+if (!b.isSunk) b.pos = b.pos.add(b.vel.multiply(timeCorrection / iterations));
+});
+this.handleCollisions();
+}
+balls.forEach(b => {
+const friction = Math.pow(0.985, timeCorrection);
+b.vel = b.vel.multiply(friction);
+if (b.vel.magnitude() < 0.05) b.vel = new Vector();
+});
+},
+handleCollisions() {
+for (let i = 0; i < balls.length; i++) {
+for (let j = i + 1; j < balls.length; j++) {
+const b1 = balls[i];
+const b2 = balls[j];
+if (b1.isSunk || b2.isSunk) continue;
+const distVec = b1.pos.subtract(b2.pos);
+const dist = distVec.magnitude();
+if (dist < b1.radius + b2.radius) {
+if ((b1.type === 'cue' || b2.type === 'cue') && !this.shotData.firstHit) {
+this.shotData.firstHit = (b1.type === 'cue') ? b2 : b1;
+}
+const normal = distVec.normalize();
+const overlap = b1.radius + b2.radius - dist;
+b1.pos = b1.pos.add(normal.multiply(overlap / 2));
+b2.pos = b2.pos.subtract(normal.multiply(overlap / 2));
+const tangent = new Vector(-normal.y, normal.x);
+const v1n = b1.vel.dot(normal);
+const v1t = b1.vel.dot(tangent);
+const v2n = b2.vel.dot(normal);
+const v2t = b2.vel.dot(tangent);
+Sound.playBallCollision(Math.abs(v1n - v2n) / 25);
+const v1nFinal = v2n;
+const v2nFinal = v1n;
+const v1nVec = normal.multiply(v1nFinal);
+const v1tVec = tangent.multiply(v1t);
+const v2nVec = normal.multiply(v2nFinal);
+const v2tVec = tangent.multiply(v2t);
+b1.vel = v1nVec.add(v1tVec);
+b2.vel = v2nVec.add(v2tVec);
+}
+}
+}
+balls.forEach(b => {
+if (b.isSunk) return;
+pockets.forEach(p => {
+if (b.pos.subtract(p.pos).magnitude() < p.radius) {
+b.isSunk = true;
+b.vel = new Vector();
+this.shotData.sunkBalls.push(b);
+Sound.playPocket();
+}
+});
+if (b.isSunk) return;
+const railRestitution = -0.85;
+if ((b.pos.x < b.radius) || (b.pos.x > canvas.width - b.radius)) {
+Sound.playRailHit(Math.abs(b.vel.x) / 20);
+b.pos.x = (b.pos.x < b.radius) ? b.radius : canvas.width - b.radius;
+b.vel.x *= railRestitution;
+if (!b.hitRail) {
+this.shotData.hitRailAfterContact = true;
+b.hitRail = true;
+}
+}
+if ((b.pos.y < b.radius) || (b.pos.y > canvas.height - b.radius)) {
+Sound.playRailHit(Math.abs(b.vel.y) / 20);
+b.pos.y = (b.pos.y < b.radius) ? b.radius : canvas.height - b.radius;
+b.vel.y *= railRestitution;
+if (!b.hitRail) {
+this.shotData.hitRailAfterContact = true;
+b.hitRail = true;
+}
+}
+});
+},
+isMoving() {
+return balls.some(b => !b.isSunk && b.vel.magnitude() > 0.05);
+}
+};
+const Game = {
+currentPlayer: player,
+isTableOpen: true,
+isBreakShot: true,
+animationFrame: null,
+lastTime: 0,
+initializeTable() {
+const w = canvas.width,
+h = canvas.height;
+const ballRadius = w / 48;
+pockets = [];
+const cornerPocketMargin = ballRadius * 0.5;
+const sidePocketOffset = ballRadius * 0.2;
+pockets.push(
+new Pocket(new Vector(cornerPocketMargin, cornerPocketMargin), true),
+new Pocket(new Vector(w / 2, -sidePocketOffset), false),
+new Pocket(new Vector(w - cornerPocketMargin, cornerPocketMargin), true),
+new Pocket(new Vector(cornerPocketMargin, h - cornerPocketMargin), true),
+new Pocket(new Vector(w / 2, h + sidePocketOffset), false),
+new Pocket(new Vector(w - cornerPocketMargin, h - cornerPocketMargin), true)
+);
+pockets.forEach(p => {
+p.radius = p.isCorner ? ballRadius * 1.6 : ballRadius * 1.7;
+});
+balls = [];
+balls.push(new Ball(new Vector(w / 4, h / 2), 0));
+const shuffleArray = a => {
+for (let i = a.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[a[i], a[j]] = [a[j], a[i]];
+}
+};
+let numberedBalls = Array.from({
+length: 15
+}, (_, i) => i + 1).filter(n => n !== 8);
+shuffleArray(numberedBalls);
+const solids = numberedBalls.filter(n => n < 8);
+const stripes = numberedBalls.filter(n => n > 8);
+const finalRack = new Array(15);
+finalRack[4] = 8;
+finalRack[10] = solids.pop();
+finalRack[14] = stripes.pop();
+const remainingNumbers = [...solids, ...stripes];
+shuffleArray(remainingNumbers);
+for (let i = 0, numIdx = 0; i < 15; i++) {
+if (typeof finalRack[i] === 'undefined') {
+finalRack[i] = remainingNumbers[numIdx++];
+}
+}
+let idx = 0;
+const startX = w * 0.7;
+const squeezeFactor = 0.998;
+for (let i = 0; i < 5; i++) {
+for (let j = 0; j <= i; j++) {
+const num = finalRack[idx++];
+if (typeof num === 'undefined') continue;
+const x = startX + i * (ballRadius * 2 * Math.sqrt(3) / 2 * squeezeFactor);
+const y = h / 2 + j * (ballRadius * 2 * squeezeFactor) - i * (ballRadius * squeezeFactor);
+balls.push(new Ball(new Vector(x, y), num));
+}
+}
+balls.forEach(b => {
+b.radius = ballRadius;
+b.isSunk = false;
+b.vel = new Vector();
+});
+},
+startNewGame() {
+playAgainBtn.style.display = 'none';
+player.ballType = null;
+ai.ballType = null;
+this.currentPlayer = player;
+this.isTableOpen = true;
+this.isBreakShot = true;
+this.initializeTable();
+this.updateStatus('Player: Break the balls!');
+this.updatePocketedDisplay();
+gameState = 'AWAITING_INPUT';
+if (!this.animationFrame) {
+this.lastTime = 0;
+this.animationFrame = requestAnimationFrame(t => this.loop(t));
+}
+},
+loop(currentTime) {
+if (gameState === 'GAME_OVER') {
+this.animationFrame = null;
+return;
+}
+if (!this.lastTime) this.lastTime = currentTime;
+const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 1 / 30);
+this.lastTime = currentTime;
+if (gameState === 'SHOT_IN_PROGRESS') Physics.update(deltaTime);
+if (gameState === 'BALL_IN_HAND' && this.currentPlayer === player) Input.handleBallInHand();
+this.draw();
+if (gameState === 'SHOT_IN_PROGRESS' && !Physics.isMoving()) {
+this.evaluateTurn();
+}
+this.animationFrame = requestAnimationFrame(t => this.loop(t));
+},
+draw() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+if ((gameState === 'BALL_IN_HAND' || gameState === 'AWAITING_INPUT') && this.isBreakShot) {
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(canvas.width / 4, 0);
+ctx.lineTo(canvas.width / 4, canvas.height);
+ctx.setLineDash([5, 10]);
+ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+ctx.lineWidth = 1;
+ctx.stroke();
+ctx.restore();
+}
+pockets.forEach(p => p.draw());
+balls.forEach(b => b.draw());
+Input.drawAimLine();
+},
+evaluateTurn() {
+const {
+firstHit,
+sunkBalls,
+hitRailAfterContact
+} = Physics.shotData;
+const sunk8Ball = sunkBalls.some(b => b.type === '8ball');
+const sunkCueBall = sunkBalls.some(b => b.type === 'cue');
+let foul = false;
+if (sunkCueBall) foul = true;
+else if (!firstHit) foul = true;
+else if (this.isTableOpen) {
+if (firstHit.type === '8ball') foul = true;
+} else {
+const remainingTargetBalls = balls.filter(b => b.type === this.currentPlayer.ballType && !b.isSunk).length;
+if (firstHit.type === '8ball' && remainingTargetBalls > 0) foul = true;
+else if (firstHit.type !== this.currentPlayer.ballType && firstHit.type !== '8ball') foul = true;
+}
+if (sunkBalls.length === 0 && firstHit && !hitRailAfterContact) foul = true;
+if (sunk8Ball) {
+const remaining = balls.filter(b => b.type === this.currentPlayer.ballType && !b.isSunk).length;
+if (foul || this.isTableOpen || (remaining > 0 && !this.isBreakShot)) {
+this.endGame(this.getOpponent(), `wins because ${this.currentPlayer.name} illegally pocketed the 8-ball`);
+} else {
+this.endGame(this.currentPlayer, 'wins!');
+}
+return;
+}
+if (foul) {
+this.handleFoul(this.isBreakShot);
+return;
+}
+let legalPot = false;
+const targetSunkBalls = sunkBalls.filter(b => b.type === 'solid' || b.type === 'stripe');
+if (this.isTableOpen && targetSunkBalls.length > 0) {
+const firstSunkType = targetSunkBalls[0].type;
+this.currentPlayer.ballType = firstSunkType;
+this.getOpponent().ballType = firstSunkType === 'solid' ? 'stripe' : 'solid';
+this.isTableOpen = false;
+const ballTypeEnglish = this.currentPlayer.ballType;
+this.updateStatus(`${this.currentPlayer.name} is now ${ballTypeEnglish}s.`);
+legalPot = true;
+} else if (!this.isTableOpen && sunkBalls.some(b => b.type === this.currentPlayer.ballType)) {
+legalPot = true;
+}
+this.updatePocketedDisplay();
+this.isBreakShot = false;
+if (legalPot) {
+this.continueTurn();
+} else {
+this.switchTurn(false);
+}
+},
+handleFoul(isBreakFoul) {
+this.updateStatus(`Foul! ${this.getOpponent().name} gets ball in hand.`);
+const cueBall = balls.find(b => b.type === 'cue');
+if (cueBall.isSunk) {
+cueBall.isSunk = false;
+}
+this.switchTurn(true, isBreakFoul);
+},
+continueTurn() {
+this.updateStatus(`${this.currentPlayer.name}'s turn. Nice shot!`);
+gameState = 'AWAITING_INPUT';
+if (this.currentPlayer === ai) {
+setTimeout(() => AI.takeShot(), 1000);
+}
+},
+switchTurn(isFoul = false, isBreakFoul = false) {
+this.currentPlayer = this.getOpponent();
+if (isFoul) {
+gameState = 'BALL_IN_HAND';
+Input.isBreakShotPlacement = isBreakFoul;
+this.updateStatus(`${this.currentPlayer.name}: Place the cue ball.`);
+if (this.currentPlayer === ai) {
+setTimeout(() => AI.placeBall(isBreakFoul), 500);
+}
+} else {
+gameState = 'AWAITING_INPUT';
+this.updateStatus(`${this.currentPlayer.name}'s turn.`);
+if (this.currentPlayer === ai) {
+setTimeout(() => AI.takeShot(), 1000);
+}
+}
+},
+endGame(winner, reason) {
+gameState = 'GAME_OVER';
+this.updateStatus(`Game Over! ${winner.name} ${reason}`);
+this.updatePocketedDisplay();
+playAgainBtn.style.display = 'block';
+if (winner === player) Sound.playWin();
+else Sound.playLose();
+},
+getOpponent() {
+return this.currentPlayer === player ? ai : player;
+},
+updateStatus(text) {
+statusDisplay.textContent = text;
+},
+updatePocketedDisplay() {
+playerPocketedContainer.innerHTML = '';
+aiPocketedContainer.innerHTML = '';
+balls.forEach(ball => {
+if (ball.isSunk && (ball.type === 'solid' || ball.type === 'stripe')) {
+const ballDiv = document.createElement('div');
+ballDiv.className = 'pocketed-ball-display';
+let ownerContainer = null;
+if (player.ballType === ball.type) ownerContainer = playerPocketedContainer;
+else if (ai.ballType === ball.type) ownerContainer = aiPocketedContainer;
+if (ownerContainer) {
+if (ball.type === 'stripe') {
+ballDiv.classList.add('stripe');
+ballDiv.style.setProperty('--stripe-color', ball.baseColor);
+} else {
+ballDiv.style.backgroundColor = ball.baseColor;
+}
+ownerContainer.appendChild(ballDiv);
+}
+}
+});
+},
+handleResize() {
+const gameArea = document.getElementById('game-area');
+const topUI = document.getElementById('top-ui');
+const canvasContainer = document.getElementById('canvas-container');
+const topUIHeight = topUI.offsetHeight;
+const availableHeight = gameArea.clientHeight - topUIHeight - 20;
+const availableWidth = gameArea.clientWidth - 40;
+const oldWidth = canvas.width;
+const oldHeight = canvas.height;
+let tableWidth = availableWidth * 0.95;
+let tableHeight = tableWidth / 2;
+if (tableHeight > availableHeight) {
+tableHeight = availableHeight;
+tableWidth = tableHeight * 2;
+}
+canvasContainer.style.width = `${tableWidth}px`;
+canvas.width = tableWidth;
+canvas.height = tableHeight;
+if (balls.length > 0 && pockets.length > 0) {
+const w = canvas.width,
+h = canvas.height;
+const ballRadius = w / 48;
+const cornerPocketMargin = ballRadius * 0.5;
+const sidePocketOffset = ballRadius * 0.2;
+pockets[0].pos = new Vector(cornerPocketMargin, cornerPocketMargin);
+pockets[1].pos = new Vector(w / 2, -sidePocketOffset);
+pockets[2].pos = new Vector(w - cornerPocketMargin, cornerPocketMargin);
+pockets[3].pos = new Vector(cornerPocketMargin, h - cornerPocketMargin);
+pockets[4].pos = new Vector(w / 2, h + sidePocketOffset);
+pockets[5].pos = new Vector(w - cornerPocketMargin, h - cornerPocketMargin);
+pockets.forEach(p => {
+p.radius = p.isCorner ? ballRadius * 1.6 : ballRadius * 1.7;
+});
+balls.forEach(b => {
+if (!b.isSunk) {
+b.pos.x = b.pos.x * (w / oldWidth);
+b.pos.y = b.pos.y * (h / oldHeight);
+}
+b.radius = ballRadius;
+});
+}
+this.draw();
+}
+};
+const Input = {
+isAiming: false,
+mousePos: new Vector(),
+isBreakShotPlacement: true,
+init() {
+canvas.addEventListener('mousemove', e => (this.mousePos = this.getMousePos(e)));
+canvas.addEventListener('mousedown', e => {
+if (gameState === 'BALL_IN_HAND' && Game.currentPlayer === player) {
+const cueBall = balls[0];
+if (cueBall.displayColor === cueBall.baseColor) {
+gameState = 'AWAITING_INPUT';
+Game.updateStatus('Player\'s turn.');
+this.isBreakShotPlacement = false;
+}
+return;
+}
+if (gameState === 'AWAITING_INPUT' && Game.currentPlayer === player) this.isAiming = true;
+});
+canvas.addEventListener('mouseup', e => {
+if (!this.isAiming) return;
+this.isAiming = false;
+const cueBall = balls[0];
+const powerVec = this.mousePos.subtract(cueBall.pos);
+if (powerVec.magnitude() < 10) return;
+gameState = 'SHOT_IN_PROGRESS';
+Physics.shotData = {
+sunkBalls: [],
+firstHit: null,
+hitRailAfterContact: false
+};
+balls.forEach(b => (b.hitRail = false));
+const power = Math.min(powerVec.magnitude() / 5, 40);
+Sound.playShot(power / 40);
+cueBall.vel = powerVec.normalize().multiply(power);
+});
+},
+getMousePos(e) {
+const rect = canvas.getBoundingClientRect();
+return new Vector(e.clientX - rect.left, e.clientY - rect.top);
+},
+handleBallInHand() {
+if (Game.currentPlayer !== player) return;
+let newPos = this.mousePos;
+const cueBall = balls[0];
+const r = cueBall.radius;
+const maxX = this.isBreakShotPlacement ? (canvas.width / 4) - r : canvas.width - r;
+newPos.x = Math.max(r, Math.min(maxX, newPos.x));
+newPos.y = Math.max(r, Math.min(canvas.height - r, newPos.y));
+cueBall.pos = newPos;
+let overlap = balls.slice(1).some(b => !b.isSunk && cueBall.pos.subtract(b.pos).magnitude() < r * 2);
+cueBall.displayColor = overlap ? '#ff4d4d' : cueBall.baseColor;
+},
+drawAimLine() {
+if (!this.isAiming || gameState !== 'AWAITING_INPUT') return;
+const cueBall = balls[0];
+if (this.mousePos.subtract(cueBall.pos).magnitude() < 10) return;
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(cueBall.pos.x, cueBall.pos.y);
+ctx.lineTo(this.mousePos.x, this.mousePos.y);
+ctx.setLineDash([5, 10]);
+ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+ctx.lineWidth = 4;
+ctx.stroke();
+ctx.restore();
+const aimDir = this.mousePos.subtract(cueBall.pos).normalize();
+let closestHit = {
+dist: Infinity,
+ball: null
+};
+for (const ball of balls) {
+if (ball.isSunk || ball.number === 0) continue;
+const ballToCue = ball.pos.subtract(cueBall.pos);
+const proj = ballToCue.dot(aimDir);
+if (proj <= 0) continue;
+const perpDistSq = ballToCue.magnitude() ** 2 - proj ** 2;
+const totalRadius = cueBall.radius + ball.radius;
+if (perpDistSq < totalRadius ** 2) {
+const distToImpact = proj - Math.sqrt(totalRadius ** 2 - perpDistSq);
+if (distToImpact >= 0 && distToImpact < closestHit.dist) {
+closestHit = {
+dist: distToImpact,
+ball: ball
+};
+}
+}
+}
+if (closestHit.ball) {
+const targetBall = closestHit.ball;
+const cueImpactPos = cueBall.pos.add(aimDir.multiply(closestHit.dist));
+const targetDir = targetBall.pos.subtract(cueImpactPos).normalize();
+const startPoint = targetBall.pos;
+const endPoint = startPoint.add(targetDir.multiply(targetBall.radius * 4));
+ctx.save();
+ctx.beginPath();
+ctx.moveTo(startPoint.x, startPoint.y);
+ctx.lineTo(endPoint.x, endPoint.y);
+ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
+ctx.lineWidth = 2;
+ctx.setLineDash([4, 4]);
+ctx.stroke();
+ctx.restore();
+}
+}
+};
+const AI = {
+isPathClear(startPos, endPos, ballToIgnore1, ballToIgnore2) {
+const lineVec = endPos.subtract(startPos);
+const lineMagSq = lineVec.x ** 2 + lineVec.y ** 2;
+for (const ball of balls) {
+if (ball.isSunk || ball === ballToIgnore1 || ball === ballToIgnore2) continue;
+const ballVec = ball.pos.subtract(startPos);
+const t = ballVec.dot(lineVec) / lineMagSq;
+if (t > 0.01 && t < 0.99) {
+const closestPoint = startPos.add(lineVec.multiply(t));
+const distSq = (closestPoint.x - ball.pos.x) ** 2 + (closestPoint.y - ball.pos.y) ** 2;
+if (distSq < (ball.radius * 2.1) ** 2) return false;
+}
+}
+return true;
+},
+takeShot() {
+if (gameState !== 'AWAITING_INPUT' || Game.currentPlayer !== ai) return;
+const bestShot = this.findBestShot();
+if (bestShot && bestShot.aimPos) {
+const finalDir = bestShot.aimPos.subtract(balls[0].pos).normalize();
+balls[0].vel = finalDir.multiply(bestShot.power);
+Sound.playShot(bestShot.power / 40);
+} else {
+Game.updateStatus('AI gives up and passes the turn.');
+setTimeout(() => {
+Game.switchTurn(false);
+}, 1000);
+return;
+}
+gameState = 'SHOT_IN_PROGRESS';
+Physics.shotData = {
+sunkBalls: [],
+firstHit: null,
+hitRailAfterContact: false
+};
+balls.forEach(b => (b.hitRail = false));
+},
+findBestShot() {
+let bestShot = {
+score: -Infinity,
+target: null,
+pocket: null,
+aimPos: null,
+power: 0
+};
+const cueBall = balls[0];
+let targetBalls = [];
+if (Game.isTableOpen) {
+targetBalls = balls.filter(b => !b.isSunk && b.type !== '8ball' && b.type !== 'cue');
+} else {
+targetBalls = balls.filter(b => b.type === ai.ballType && !b.isSunk);
+if (targetBalls.length === 0) {
+targetBalls = balls.filter(b => b.type === '8ball' && !b.isSunk);
+}
+}
+if (targetBalls.length === 0) return null;
+for (const target of targetBalls) {
+for (const pocket of pockets) {
+let effectivePocketPos = pocket.pos;
+const centerPocketVerticalOffset = cueBall.radius * 0.75;
+if (!pocket.isCorner) {
+if (pocket.pos.y < canvas.height / 2) { // Upper center pocket
+effectivePocketPos = pocket.pos.add(new Vector(0, centerPocketVerticalOffset));
+} else {
+effectivePocketPos = pocket.pos.subtract(new Vector(0, centerPocketVerticalOffset));
+}
+}
+const targetToPocketDir = effectivePocketPos.subtract(target.pos).normalize();
+let aimPos = target.pos.subtract(targetToPocketDir.multiply(cueBall.radius + target.radius));
+if (!pocket.isCorner) {
+const perpDir = new Vector(-targetToPocketDir.y, targetToPocketDir.x);
+const centerPocketLateralOffset = cueBall.radius * 0.05;
+if (target.pos.x < canvas.width / 2) {
+aimPos = aimPos.add(perpDir.multiply(centerPocketLateralOffset));
+} else {
+aimPos = aimPos.subtract(perpDir.multiply(centerPocketLateralOffset));
+}
+}
+if (!this.isPathClear(cueBall.pos, aimPos, cueBall, target)) continue;
+if (!this.isPathClear(target.pos, effectivePocketPos, target, cueBall)) continue;
+const cueToAimDir = aimPos.subtract(cueBall.pos).normalize();
+const angleBonus = cueToAimDir.dot(targetToPocketDir);
+if (angleBonus < 0.05) continue;
+let score = 1000;
+score += (1 / (cueBall.pos.subtract(aimPos).magnitude() + target.pos.subtract(effectivePocketPos).magnitude())) * 200; // Use effectivePocketPos for score distance
+score += angleBonus * 100;
+if (target.type === '8ball') score *= 2;
+if (score > bestShot.score) {
+const power = Math.min(10 + (cueBall.pos.subtract(aimPos).magnitude() + target.pos.subtract(effectivePocketPos).magnitude()) / 30, 35); // Use effectivePocketPos for power distance
+bestShot = {
+score,
+target,
+pocket,
+aimPos,
+power
+};
+}
+}
+}
+if (bestShot.score === -Infinity) {
+Game.updateStatus("AI is considering a bank shot...");
+const rails = [{
+y: 0
+}, {
+y: canvas.height
+}, {
+x: 0
+}, {
+x: canvas.width
+}];
+for (const target of targetBalls) {
+for (const pocket of pockets) {
+for (const rail of rails) {
+let virtualPocketPos = (rail.y !== undefined) ?
+new Vector(pocket.pos.x, 2 * rail.y - pocket.pos.y) :
+new Vector(2 * rail.x - pocket.pos.x, pocket.pos.y);
+const targetToVirtualPocket = virtualPocketPos.subtract(target.pos);
+const bankPointDir = targetToVirtualPocket.normalize();
+const aimPos = target.pos.subtract(bankPointDir.multiply(cueBall.radius + target.radius));
+if (!this.isPathClear(cueBall.pos, aimPos, cueBall, target)) continue;
+const cueToAimDir = aimPos.subtract(cueBall.pos).normalize();
+const angleBonus = cueToAimDir.dot(bankPointDir);
+if (angleBonus < 0.1) continue;
+let score = 500;
+score += (1 / targetToVirtualPocket.magnitude()) * 100 + angleBonus * 50;
+if (target.type === '8ball') score *= 2;
+if (score > bestShot.score) {
+const power = Math.min(15 + targetToVirtualPocket.magnitude() / 25, 40);
+bestShot = {
+score,
+target,
+pocket,
+aimPos,
+power
+};
+}
+}
+}
+}
+}
+if (bestShot.score === -Infinity) {
+Game.updateStatus('AI can\'t find a good pot. Playing positionally.');
+for (const target of targetBalls) {
+const tableCenter = new Vector(canvas.width / 2, canvas.height / 2);
+const targetToCenterDir = tableCenter.subtract(target.pos).normalize();
+const aimPos = target.pos.add(targetToCenterDir.multiply(cueBall.radius + target.radius));
+if (!this.isPathClear(cueBall.pos, aimPos, cueBall, target)) continue;
+const cueToTargetDist = cueBall.pos.subtract(target.pos).magnitude();
+const score = 200 - cueToTargetDist;
+if (score > bestShot.score) {
+bestShot = {
+score,
+target,
+pocket: null,
+aimPos,
+power: 15
+};
+}
+}
+}
+return bestShot.score > -Infinity ? bestShot : null;
+},
+placeBall(isBreakFoul) {
+let bestPlacement = {
+score: -Infinity,
+position: null
+};
+const cueBall = balls[0];
+const step = cueBall.radius * 3;
+const startX = cueBall.radius;
+const endX = isBreakFoul ? canvas.width / 4 - cueBall.radius : canvas.width - cueBall.radius;
+for (let x = startX; x < endX; x += step) {
+for (let y = cueBall.radius; y < canvas.height; y += step) {
+const testPos = new Vector(x, y);
+if (balls.slice(1).some(b => !b.isSunk && testPos.subtract(b.pos).magnitude() < cueBall.radius * 2.1)) continue;
+cueBall.pos = testPos;
+const shot = this.findBestShot();
+if (shot && shot.score > bestPlacement.score) {
+bestPlacement = {
+score: shot.score,
+position: testPos
+};
+}
+}
+}
+cueBall.pos = bestPlacement.position || new Vector(isBreakFoul ? canvas.width / 8 : canvas.width * 0.75, canvas.height / 2);
+gameState = 'AWAITING_INPUT';
+Game.updateStatus('AI\'s turn.');
+setTimeout(() => this.takeShot(), 1000);
+},
+};
+playAgainBtn.addEventListener('click', () => {
+Sound.playClick();
+Game.startNewGame();
+});
+howToPlayBtn.addEventListener('click', () => {
+Sound.playClick();
+rulesModal.style.display = 'block';
+});
+closeModalBtn.addEventListener('click', () => {
+Sound.playClick();
+rulesModal.style.display = 'none';
+});
+window.addEventListener('click', e => {
+if (e.target == rulesModal) rulesModal.style.display = 'none';
+});
+window.addEventListener('resize', () => Game.handleResize());
+Sound.init();
+Input.init();
+Game.handleResize();
+Game.startNewGame();
+});
+</script>
+</body>
+</html>

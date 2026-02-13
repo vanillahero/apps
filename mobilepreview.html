@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Game Device Simulator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2275%22 font-size=%2280%22 text-anchor=%22middle%22>%F0%9F%93%B1</text></svg>">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-color: #1e1e1e;
+            --accent-color: #007aff;
+            --text-color: #e0e0e0;
+            --device-bezel: #222;
+            --device-screen-bg: #fff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header UI */
+        header {
+            height: 60px;
+            background-color: var(--panel-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            border-bottom: 1px solid #333;
+            z-index: 100;
+        }
+
+        .btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #444; }
+        .btn.primary { background: var(--accent-color); }
+        .btn.active { background: #555; border: 1px solid var(--accent-color); }
+
+        select {
+            background: #333;
+            color: white;
+            border: 1px solid #444;
+            padding: 7px;
+            border-radius: 6px;
+        }
+
+        /* Simulator Area */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            perspective: 1000px;
+            overflow: auto;
+        }
+
+        /* Device Styling */
+        .device-wrapper {
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center center;
+        }
+
+        .device-frame {
+            background: var(--device-bezel);
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5), 0 0 0 4px #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Screen & Iframe */
+        .screen {
+            background: var(--device-screen-bg);
+            border-radius: 30px;
+            width: 390px;  /* iPhone 14 Logic Width */
+            height: 844px; /* iPhone 14 Logic Height */
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        /* iPhone UI Elements */
+        .status-bar {
+            height: 44px;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            box-sizing: border-box;
+            font-size: 12px;
+            font-weight: bold;
+            color: black;
+            flex-shrink: 0;
+        }
+
+        .dynamic-island {
+            width: 110px;
+            height: 30px;
+            background: black;
+            border-radius: 20px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .safari-bottom-bar {
+            height: 80px;
+            background: #f8f8f8;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 5px;
+            flex-shrink: 0;
+        }
+
+        .url-bar {
+            width: 90%;
+            height: 34px;
+            background: #e3e3e3;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .nav-icons {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+
+        .home-indicator {
+            width: 120px;
+            height: 5px;
+            background: #000;
+            border-radius: 10px;
+            margin: 10px auto 5px auto;
+            opacity: 0.3;
+        }
+
+        /* Landscape Modifiers */
+        .landscape .status-bar, 
+        .landscape .url-bar, 
+        .landscape .nav-icons,
+        .landscape .dynamic-island {
+            display: none; 
+        }
+
+        /* In landscape, the bottom bar shrinks to only show the home indicator */
+        .landscape .safari-bottom-bar {
+            height: 20px;
+            background: transparent;
+            border: none;
+        }
+
+        .screen {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hidden inputs */
+        #fileInput { display: none; }
+
+        /* Controls */
+        .controls-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: #666;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="btn primary" onclick="document.getElementById('fileInput').click()">
+        <span>📂</span> Upload HTML Game
+    </button>
+    <input type="file" id="fileInput" accept=".html">
+
+    <button class="btn" onclick="toggleOrientation()">
+        <span>🔄</span> Rotate
+    </button>
+
+    <select id="deviceSelect" onchange="changeDevice()">
+        <option value="iphone14">iPhone 14/15 (390x844)</option>
+        <option value="s23">Galaxy S23 (360x800)</option>
+        <option value="ipad">iPad Air (820x1180)</option>
+    </select>
+
+    <div style="margin-left: auto; font-weight: bold; color: var(--accent-color);">
+        MOBILE PREVIEWER
+    </div>
+</header>
+
+<main>
+    <div class="device-wrapper" id="deviceWrapper">
+        <div class="device-frame">
+            <div class="screen" id="deviceScreen">
+                <div class="dynamic-island" id="notch"></div>
+                <div class="status-bar" id="statusBar">
+                    <span id="currentTime">9:41</span>
+                    <span style="letter-spacing: 1px;">📶 🛜 🔋</span>
+                </div>
+                
+                <iframe id="gameFrame" src="about:blank"></iframe>
+
+                <div class="safari-bottom-bar" id="browserChrome">
+                    <div class="url-bar">AA &nbsp;&nbsp; game-preview.local &nbsp;&nbsp; ↻</div>
+                    <div class="nav-icons">
+                        <span>＜</span><span>＞</span><span>⎙</span><span>📖</span><span>❐</span>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="controls-info">
+    Simulating: Touch Events Enabled (Pointer-to-Touch mapping active)
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const gameFrame = document.getElementById('gameFrame');
+    const deviceWrapper = document.getElementById('deviceWrapper');
+    const deviceScreen = document.getElementById('deviceScreen');
+    const timeDisplay = document.getElementById('currentTime');
+
+    // Update Clock
+    setInterval(() => {
+        const now = new Date();
+        timeDisplay.innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
+    }, 1000);
+
+    // File Loading
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            gameFrame.src = url;
+        }
+    });
+
+    // Orientation
+    function toggleOrientation() {
+        const isLandscape = deviceWrapper.classList.toggle('landscape');
+        
+        const currentW = deviceScreen.offsetWidth;
+        const currentH = deviceScreen.offsetHeight;
+        
+        // Swap dimensions
+        deviceScreen.style.width = currentH + 'px';
+        deviceScreen.style.height = currentW + 'px';
+
+        // Optional: Force iframe to resize if game uses canvas
+        gameFrame.style.display = 'none';
+        setTimeout(() => gameFrame.style.display = 'block', 0);
+    }
+
+    // Initialize default device
+    window.addEventListener('load', () => {
+        changeDevice();
+    });
+
+    // Device Presets
+    function changeDevice() {
+        const model = document.getElementById('deviceSelect').value;
+        const notch = document.getElementById('notch');
+        
+        // Force reset orientation classes and inline styles when switching
+        deviceWrapper.classList.remove('landscape');
+
+        if (model === 'iphone14') {
+            updateScreen(390, 844);
+            notch.style.display = 'block';
+        } else if (model === 's23') {
+            updateScreen(360, 800);
+            notch.style.display = 'none';
+        } else if (model === 'ipad') {
+            updateScreen(820, 1180);
+            notch.style.display = 'none';
+        }
+    }
+
+    function updateScreen(w, h) {
+        deviceScreen.style.width = w + 'px';
+        deviceScreen.style.height = h + 'px';
+    }
+
+    /**
+     * Touch Simulation Logic
+     * Modern browsers map mouse clicks to clicks in iframes, 
+     * but many mobile games require actual Touch events.
+     * This helper injects a script to map PointerEvents if the game needs it.
+     */
+    gameFrame.onload = function() {
+        try {
+            const doc = gameFrame.contentDocument || gameFrame.contentWindow.document;
+            // Inject a small script to the uploaded game to ensure touch compatibility
+            const script = doc.createElement('script');
+            script.innerHTML = `
+                // Simple touch emulation if needed
+                window.addEventListener('mousedown', (e) => {
+                    window.dispatchEvent(new TouchEvent('touchstart', {
+                        bubbles: true, cancelable: true,
+                        touches: [{ clientX: e.clientX, clientY: e.clientY }]
+                    }));
+                });
+            `;
+            doc.head.appendChild(script);
+        } catch (e) {
+            console.warn("Cross-origin or empty frame prevents script injection. This is normal for local files.");
+        }
+    };
+</script>
+
+</body>
+</html>

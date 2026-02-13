@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solitaire Klondike - Free Online Card Game</title>
+<meta name="description" content="Play classic Klondike Solitaire for free. Dark mode, best time tracking, and smooth gameplay in your browser.">
+<script src="widget.js" async></script>
+<style>
+:root {
+--bg-color: #1a3a1a;
+--board-color: #355735;
+--card-back-color: #4a7c4a;
+--card-front-color: #f0f0e0;
+--primary-text-color: #d4e0d4;
+--secondary-text-color: #a3b8a3;
+--red-suit-color: #c94c4c;
+--black-suit-color: #333333;
+--card-border-radius: 8px;
+--shadow-color: rgba(0, 0, 0, 0.3);
+--base-unit: 1vmin;
+--card-width: calc(10 * var(--base-unit));
+--card-height: calc(var(--card-width) * 1.4);
+--gap: calc(1.5 * var(--base-unit));
+}
+* {
+box-sizing: border-box;
+margin: 8;
+padding: 0;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+background-color: var(--bg-color);
+color: var(--primary-text-color);
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+overflow: hidden;
+}
+#game-container {
+width: 100vw;
+height: 100vh;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+gap: var(--gap);
+}
+#game-board {
+aspect-ratio: 16 / 9;
+height: auto;
+max-height: calc(100vh - var(--gap) * 2);
+background-color: var(--board-color);
+border-radius: 15px;
+box-shadow: 0 10px 30px var(--shadow-color);
+padding: var(--gap);
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+grid-template-rows: var(--card-height) 1fr;
+gap: var(--gap);
+flex-grow: 1;
+flex-shrink: 1;
+min-width: 0;
+}
+#game-sidebar {
+background-color: var(--board-color);
+border-radius: 15px;
+box-shadow: 0 10px 30px var(--shadow-color);
+padding: var(--gap);
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: var(--gap);
+max-height: calc(100vh - var(--gap) * 2);
+width: calc(var(--card-width) * 1.8);
+min-width: calc(var(--card-width) * 1.8);
+flex-shrink: 0;
+}
+#timer-display {
+font-size: calc(3 * var(--base-unit));
+font-weight: bold;
+color: var(--primary-text-color);
+margin-bottom: calc(var(--gap) / 2);
+}
+#game-sidebar h3 {
+color: var(--primary-text-color);
+font-size: calc(2 * var(--base-unit));
+margin-bottom: calc(var(--gap) / 2);
+border-bottom: 1px solid var(--secondary-text-color);
+padding-bottom: calc(var(--gap) / 4);
+width: 100%;
+text-align: center;
+}
+#best-times-list {
+list-style: none;
+padding: 0;
+width: 100%;
+overflow-y: auto;
+font-size: calc(1.5 * var(--base-unit));
+}
+#best-times-list li {
+background-color: var(--bg-color);
+margin-bottom: calc(var(--gap) / 4);
+padding: calc(var(--gap) / 4) calc(var(--gap) / 2);
+border-radius: 5px;
+color: var(--primary-text-color);
+white-space: nowrap;
+text-overflow: ellipsis;
+overflow: hidden;
+}
+#best-times-list li:nth-child(1) {
+background-color: #ffd700;
+color: var(--black-suit-color);
+font-weight: bold;
+}
+#best-times-list li:nth-child(2) {
+background-color: #c0c0c0;
+color: var(--black-suit-color);
+font-weight: bold;
+}
+#best-times-list li:nth-child(3) {
+background-color: #cd7f32;
+color: var(--black-suit-color);
+font-weight: bold;
+}
+.top-row {
+grid-column: 1 / -1;
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: var(--gap);
+}
+#stock {
+grid-column: 1;
+}
+#waste {
+grid-column: 2;
+}
+#foundation-0 {
+grid-column: 4;
+}
+#foundation-1 {
+grid-column: 5;
+}
+#foundation-2 {
+grid-column: 6;
+}
+#foundation-3 {
+grid-column: 7;
+}
+.tableau-piles {
+grid-column: 1 / -1;
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: var(--gap);
+}
+.pile {
+position: relative;
+width: var(--card-width);
+min-height: var(--card-height);
+}
+.empty-pile {
+width: var(--card-width);
+height: var(--card-height);
+border-radius: var(--card-border-radius);
+border: 2px dashed var(--secondary-text-color);
+opacity: 0.5;
+display: flex;
+justify-content: center;
+align-items: center;
+font-size: calc(4 * var(--base-unit));
+color: var(--secondary-text-color);
+position: absolute;
+top: 0;
+left: 0;
+}
+#stock .empty-pile::before {
+content: '♺';
+}
+.foundation .empty-pile::before {
+content: 'A';
+}
+.tableau-pile .empty-pile::before {
+content: 'K';
+}
+.card {
+width: var(--card-width);
+height: var(--card-height);
+background-color: var(--card-front-color);
+border: 1px solid var(--board-color);
+border-radius: var(--card-border-radius);
+box-shadow: 0 2px 5px var(--shadow-color);
+cursor: pointer;
+position: absolute;
+user-select: none;
+transition: transform 0.2s ease-in-out, top 0.2s ease-in-out, left 0.2s ease-in-out;
+font-size: calc(2.2 * var(--base-unit));
+font-weight: bold;
+}
+.card.dragging {
+opacity: 0.6;
+transform: scale(1.05);
+box-shadow: 0 10px 20px var(--shadow-color);
+}
+.card.face-down {
+background-color: var(--card-back-color);
+background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent);
+background-size: 20px 20px;
+}
+.card.face-down .rank,
+.card.face-down .suit {
+display: none;
+}
+.card.red {
+color: var(--red-suit-color);
+}
+.card.black {
+color: var(--black-suit-color);
+}
+.rank {
+position: absolute;
+top: calc(0.5 * var(--base-unit));
+left: calc(0.8 * var(--base-unit));
+}
+.suit {
+font-size: calc(4 * var(--base-unit));
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+#reset-button,
+#win-reset-button,
+#help-button {
+background-color: var(--card-front-color);
+color: var(--board-color);
+border: none;
+padding: 10px 20px;
+border-radius: 8px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0 2px 5px var(--shadow-color);
+transition: background-color 0.2s;
+z-index: 10;
+}
+#reset-button {
+position: fixed;
+bottom: 20px;
+right: 20px;
+}
+#help-button {
+position: fixed;
+bottom: 20px;
+left: 20px;
+}
+#reset-button:hover,
+#win-reset-button:hover,
+#help-button:hover {
+background-color: var(--primary-text-color);
+}
+#win-screen,
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.7);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 100;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.5s ease;
+}
+#win-screen {
+flex-direction: column;
+color: white;
+}
+#win-screen.visible,
+.modal-overlay.visible {
+opacity: 1;
+pointer-events: all;
+}
+#win-screen h1 {
+font-size: 5rem;
+margin-bottom: 1rem;
+color: var(--primary-text-color);
+}
+.modal-content {
+background-color: var(--board-color);
+color: var(--primary-text-color);
+padding: 20px 30px;
+border-radius: 15px;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+width: 90%;
+max-width: 630px;
+position: relative;
+max-height: 80vh;
+overflow-y: auto;
+}
+.close-button {
+position: absolute;
+top: 10px;
+right: 20px;
+font-size: 2.5rem;
+font-weight: bold;
+color: var(--secondary-text-color);
+cursor: pointer;
+line-height: 1;
+}
+.close-button:hover {
+color: var(--primary-text-color);
+}
+.modal-content h2 {
+margin-top: 0;
+margin-bottom: 20px;
+border-bottom: 1px solid var(--secondary-text-color);
+padding-bottom: 10px;
+}
+.modal-content h3 {
+margin-top: 20px;
+margin-bottom: 10px;
+color: var(--primary-text-color);
+}
+.modal-content p,
+.modal-content li {
+line-height: 1.4;
+color: var(--primary-text-color);
+}
+.modal-content ul {
+list-style-position: inside;
+padding-left: 10px;
+}
+.modal-content li+li {
+margin-top: 8px;
+}
+#win-screen,
+.modal-overlay,
+#no-moves-screen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.7);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 100;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.5s ease;
+}
+#win-screen,
+#no-moves-screen {
+flex-direction: column;
+color: white;
+}
+#win-screen.visible,
+.modal-overlay.visible,
+#no-moves-screen.visible {
+opacity: 1;
+pointer-events: all;
+}
+#win-screen h1,
+#no-moves-screen h1 {
+font-size: 5rem;
+margin-bottom: 1rem;
+color: var(--primary-text-color);
+}
+#no-moves-screen p {
+font-size: 1.5rem;
+margin-bottom: 2rem;
+color: var(--secondary-text-color);
+}
+#win-reset-button,
+#no-moves-reset-button {
+background-color: var(--card-front-color);
+color: var(--board-color);
+border: none;
+padding: 10px 20px;
+border-radius: 8px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+box-shadow: 0 2px 5px var(--shadow-color);
+transition: background-color 0.2s;
+z-index: 10;
+}
+#win-reset-button:hover,
+#no-moves-reset-button:hover {
+background-color: var(--primary-text-color);
+}
+.modal-content {
+background-color: var(--board-color);
+color: var(--primary-text-color);
+padding: 20px 30px;
+border-radius: 15px;
+box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+width: 90%;
+max-width: 800px;
+position: relative;
+max-height: 80vh;
+overflow-y: auto;
+}
+.card.marked {
+outline: 3px solid #ffcc00;
+box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
+transform: translateY(-5px) scale(1.03);
+z-index: 50;
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+<div id="game-board">
+<div class="top-row">
+<div id="stock" class="pile">
+<div class="empty-pile"></div>
+</div>
+<div id="waste" class="pile">
+<div class="empty-pile" style="display: none;"></div>
+</div>
+<div id="foundation-0" class="pile foundation">
+<div class="empty-pile"></div>
+</div>
+<div id="foundation-1" class="pile foundation">
+<div class="empty-pile"></div>
+</div>
+<div id="foundation-2" class="pile foundation">
+<div class="empty-pile"></div>
+</div>
+<div id="foundation-3" class="pile foundation">
+<div class="empty-pile"></div>
+</div>
+</div>
+<div class="tableau-piles">
+<div id="tableau-0" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-1" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-2" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-3" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-4" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-5" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+<div id="tableau-6" class="pile tableau-pile">
+<div class="empty-pile"></div>
+</div>
+</div>
+</div>
+<div id="game-sidebar">
+<div id="timer-display">00:00</div>
+<h3>Best Times</h3>
+<ul id="best-times-list">
+<li>No times yet!</li>
+</ul>
+</div>
+</div>
+<div id="win-screen">
+<h1>You Win!</h1>
+<button id="win-reset-button">Play Again</button>
+</div>
+<div id="no-moves-screen">
+<h1>No More Moves!</h1>
+<p>Consider starting a new game.</p>
+<button id="no-moves-reset-button">New Game</button>
+</div>
+<div id="help-modal" class="modal-overlay">
+<div class="modal-content">
+<span id="close-help-button" class="close-button">&times;</span>
+<h2>How to Play Klondike Solitaire</h2>
+<p><strong>Objective:</strong> Move all 52 cards to the four Foundation piles in ascending order (Ace to King) for each suit.</p>
+<h3>The Piles</h3>
+<ul>
+<li><strong>Tableau:</strong> The seven piles in the main area. Build these piles down by alternating colors (e.g., a red 6 on a black 7). You can move single cards or stacks of face-up cards. Only a King can be placed in an empty tableau spot.</li>
+<li><strong>Foundations:</strong> The four empty piles at the top right. Build these up by suit, starting with the Ace.</li>
+<li><strong>Stock:</strong> The face-down pile at the top left. Click it to draw one card to the Waste pile.</li>
+<li><strong>Waste:1</strong> The face-up pile next to the Stock. The top card is available to be played to the Tableau or Foundations. When the Stock is empty, click the outline to reset it from the Waste pile.</li>
+</ul>
+<h3>Actions</h3>
+<ul>
+<li><strong>Drag & Drop:</strong> Move cards or stacks between piles, or you can:</li>
+<li><strong>Click to Mark & Move:</strong> Click a face-up card or stack to mark it, then click an empty pile or a valid card on another pile to drop the marked cards. Click the marked card again to unmark it.</li>
+</ul>
+<button style="display: block; margin: 0 auto 10px auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
+</div>
+</div>
+<button id="reset-button">New Game</button>
+<button id="help-button">How to Play</button>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const SUITS = ["♥", "♦", "♠", "♣"];
+const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+let deck = [];
+let piles = {
+stock: [],
+waste: [],
+foundations: [
+[],
+[],
+[],
+[]
+],
+tableau: [
+[],
+[],
+[],
+[],
+[],
+[],
+[]
+]
+};
+const gameBoard = document.getElementById('game-board');
+const stockPileEl = document.getElementById('stock');
+const wastePileEl = document.getElementById('waste');
+const foundationPileEls = Array.from(document.querySelectorAll('.foundation'));
+const tableauPileEls = Array.from(document.querySelectorAll('.tableau-pile'));
+const allPileEls = [stockPileEl, wastePileEl, ...foundationPileEls, ...tableauPileEls];
+const winScreenEl = document.getElementById('win-screen');
+const noMovesScreenEl = document.getElementById('no-moves-screen');
+const noMovesResetButton = document.getElementById('no-moves-reset-button');
+let startTime;
+let timerInterval;
+let elapsedTime = 0;
+const BEST_TIMES_KEY = 'cozySolitaireBestTimes';
+let bestTimes = [];
+const timerDisplayEl = document.getElementById('timer-display');
+const bestTimesListEl = document.getElementById('best-times-list');
+let markedCardState = null;
+function createDeck() {
+deck = [];
+for (const suit of SUITS) {
+for (let i = 0; i < RANKS.length; i++) {
+deck.push({
+suit,
+rank: RANKS[i],
+value: i + 1,
+color: (suit === "♥" || suit === "♦") ? 'red' : 'black',
+faceUp: false,
+id: `${RANKS[i]}${suit}`
+});
+}
+}
+}
+function shuffleDeck() {
+for (let i = deck.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[deck[i], deck[j]] = [deck[j], deck[i]];
+}
+}
+function dealCards() {
+for (let i = 0; i < 7; i++) {
+for (let j = i; j < 7; j++) {
+const card = deck.pop();
+if (i === j) {
+card.faceUp = true;
+}
+piles.tableau[j].push(card);
+}
+}
+piles.stock = deck;
+}
+function render() {
+gameBoard.querySelectorAll('.card').forEach(c => c.remove());
+allPileEls.forEach(pileEl => {
+const pileInfo = getPileInfo(pileEl);
+const pileArray = getPileArray(pileInfo.pileName, pileInfo.pileIndex);
+const emptyEl = pileEl.querySelector('.empty-pile');
+if (emptyEl) {
+emptyEl.style.display = pileArray.length === 0 ? 'flex' : 'none';
+}
+});
+piles.stock.slice(-3).forEach((card, index) => {
+const cardEl = createCardElement(card);
+cardEl.style.top = `${index * 0.2}vmin`;
+cardEl.style.left = `${index * 0.2}vmin`;
+stockPileEl.appendChild(cardEl);
+});
+piles.waste.slice(-3).forEach((card, index, arr) => {
+const cardEl = createCardElement(card);
+cardEl.style.left = `${index * 2.5}vmin`;
+if (index !== arr.length - 1) {
+cardEl.draggable = false;
+cardEl.style.pointerEvents = 'none';
+}
+wastePileEl.appendChild(cardEl);
+});
+piles.foundations.forEach((pile, index) => {
+if (pile.length > 0) {
+const topCard = pile[pile.length - 1];
+const cardEl = createCardElement(topCard);
+foundationPileEls[index].appendChild(cardEl);
+}
+});
+piles.tableau.forEach((pile, index) => {
+pile.forEach((card, cardIndex) => {
+const cardEl = createCardElement(card);
+if (card.faceUp) {
+cardEl.style.top = `${getFaceUpOffset(pile, cardIndex)}vmin`;
+} else {
+cardEl.style.top = `${cardIndex * 1.2}vmin`;
+}
+tableauPileEls[index].appendChild(cardEl);
+});
+});
+if (markedCardState) {
+markedCardState.cardIds.forEach(cardId => {
+const cardEl = document.querySelector(`.card[data-id="${cardId}"]`);
+if (cardEl) {
+cardEl.classList.add('marked');
+}
+});
+}
+checkGameStatus();
+}
+function getFaceUpOffset(pile, cardIndex) {
+let offset = 0;
+for (let i = 0; i < cardIndex; i++) {
+offset += pile[i].faceUp ? 3.5 : 1.2;
+}
+return offset;
+}
+function createCardElement(card) {
+const el = document.createElement('div');
+el.classList.add('card', card.color);
+el.dataset.id = card.id;
+el.draggable = card.faceUp;
+if (!card.faceUp) {
+el.classList.add('face-down');
+}
+el.innerHTML = `
+<div class="rank">${card.rank}</div>
+<div class="suit">${card.suit}</div>
+`;
+if (card.faceUp) {
+el.addEventListener('dragstart', onDragStart);
+el.addEventListener('dblclick', onDoubleClick);
+el.addEventListener('click', onCardClick);
+}
+return el;
+}
+function onDragStart(e) {
+clearMarkedState();
+const cardEl = e.target;
+const {
+pileName,
+pileIndex,
+cardIndex
+} = getCardLocation(cardEl);
+let draggedCardsInfo = {
+pileName,
+pileIndex,
+cardIndex
+};
+e.dataTransfer.setData('application/json', JSON.stringify(draggedCardsInfo));
+e.dataTransfer.effectAllowed = 'move';
+setTimeout(() => {
+if (pileName === 'tableau') {
+const pile = piles.tableau[pileIndex];
+for (let i = cardIndex; i < pile.length; i++) {
+const draggedCardEl = document.querySelector(`[data-id="${pile[i].id}"]`);
+if (draggedCardEl) draggedCardEl.classList.add('dragging');
+}
+} else {
+cardEl.classList.add('dragging');
+}
+}, 0);
+}
+function onDragOver(e) {
+e.preventDefault();
+}
+function onDrop(e) {
+e.preventDefault();
+document.querySelectorAll('.card.dragging').forEach(c => c.classList.remove('dragging'));
+clearMarkedState();
+const draggedInfo = JSON.parse(e.dataTransfer.getData('application/json'));
+const targetEl = e.target.closest('.pile');
+if (!targetEl) return;
+const {
+pileName: targetPileName,
+pileIndex: targetPileIndex
+} = getPileInfo(targetEl);
+const sourcePile = getPileArray(draggedInfo.pileName, draggedInfo.pileIndex);
+if (!sourcePile) return;
+const cardsToMove = sourcePile.slice(draggedInfo.cardIndex);
+if (isValidMove(cardsToMove, targetPileName, targetPileIndex)) {
+performMove(draggedInfo, targetPileName, targetPileIndex, cardsToMove);
+render();
+}
+}
+function isValidMove(cards, targetPileName, targetPileIndex) {
+if (cards.length === 0) return false;
+const firstCard = cards[0];
+const targetPile = getPileArray(targetPileName, targetPileIndex);
+if (targetPileName === 'foundation') {
+if (cards.length > 1) return false;
+if (targetPile.length === 0) {
+return firstCard.value === 1;
+} else {
+const topCard = targetPile[targetPile.length - 1];
+return firstCard.suit === topCard.suit && firstCard.value === topCard.value + 1;
+}
+}
+if (targetPileName === 'tableau') {
+if (targetPile.length === 0) {
+return firstCard.value === 13;
+} else {
+const topCard = targetPile[targetPile.length - 1];
+if (!topCard.faceUp) return false;
+return firstCard.color !== topCard.color && firstCard.value === topCard.value - 1;
+}
+}
+return false;
+}
+function performMove(sourceInfo, targetPileName, targetPileIndex, cardsToMove) {
+const sourcePile = getPileArray(sourceInfo.pileName, sourceInfo.pileIndex);
+const targetPile = getPileArray(targetPileName, targetPileIndex);
+sourcePile.splice(sourceInfo.cardIndex);
+targetPile.push(...cardsToMove);
+if (sourceInfo.pileName === 'tableau' && sourcePile.length > 0) {
+const topCard = sourcePile[sourcePile.length - 1];
+if (!topCard.faceUp) {
+topCard.faceUp = true;
+}
+}
+}
+let clickTimer = null;
+function onDoubleClick(e) {
+if (clickTimer) {
+clearTimeout(clickTimer);
+clickTimer = null;
+}
+clearMarkedState();
+const cardEl = e.target.closest('.card');
+if (!cardEl) return;
+const {
+pileName,
+pileIndex,
+cardIndex
+} = getCardLocation(cardEl);
+const pile = getPileArray(pileName, pileIndex);
+if (pileName === 'foundation') return;
+if (pileName === 'tableau' && cardIndex !== pile.length - 1) return;
+if (pileName === 'waste' && cardIndex !== pile.length - 1) return;
+const cardToMove = pile[cardIndex];
+for (let i = 0; i < 4; i++) {
+if (isValidMove([cardToMove], 'foundation', i)) {
+const sourceInfo = {
+pileName,
+pileIndex,
+cardIndex
+};
+performMove(sourceInfo, 'foundation', i, [cardToMove]);
+render();
+return;
+}
+}
+}
+function onCardClick(e) {
+e.stopPropagation();
+const clickedCardEl = e.target.closest('.card');
+if (!clickedCardEl) return;
+if (clickTimer) {
+clearTimeout(clickTimer);
+clickTimer = null;
+return;
+}
+clickTimer = setTimeout(() => {
+clickTimer = null;
+const clickedCardId = clickedCardEl.dataset.id;
+const {
+pileName,
+pileIndex,
+cardIndex
+} = getCardLocation(clickedCardEl);
+const sourcePile = getPileArray(pileName, pileIndex);
+const clickedCard = sourcePile[cardIndex];
+if (!markedCardState) {
+if (pileName === 'stock' || !clickedCard.faceUp) return;
+if (pileName === 'waste' && cardIndex !== sourcePile.length - 1) return;
+let cardsToMark = [];
+if (pileName === 'tableau') {
+cardsToMark = sourcePile.slice(cardIndex);
+} else {
+cardsToMark = [clickedCard];
+}
+const cardIdsToMark = cardsToMark.map(c => c.id);
+markedCardState = {
+pileName,
+pileIndex,
+cardIndex,
+cardIds: cardIdsToMark
+};
+render();
+} else {
+const sourcePileForMarked = getPileArray(markedCardState.pileName, markedCardState.pileIndex);
+const cardsToMove = sourcePileForMarked.slice(markedCardState.cardIndex);
+const targetPileEl = clickedCardEl.closest('.pile');
+const {
+pileName: targetPileName,
+pileIndex: targetPileIndex
+} = getPileInfo(targetPileEl);
+if (isValidMove(cardsToMove, targetPileName, targetPileIndex)) {
+performMove(markedCardState, targetPileName, targetPileIndex, cardsToMove);
+clearMarkedState();
+render();
+} else if (markedCardState.cardIds.includes(clickedCardId)) {
+clearMarkedState();
+render();
+} else {
+clearMarkedState();
+render();
+}
+}
+}, 250);
+}
+function onPileClick(e) {
+if (!markedCardState) return;
+const targetEl = e.target.closest('.pile');
+if (!targetEl) return;
+const {
+pileName: targetPileName,
+pileIndex: targetPileIndex
+} = getPileInfo(targetEl);
+if (targetPileName === markedCardState.pileName && targetPileIndex === markedCardState.pileIndex) {
+clearMarkedState();
+render();
+return;
+}
+const sourcePileForMarked = getPileArray(markedCardState.pileName, markedCardState.pileIndex);
+const cardsToMove = sourcePileForMarked.slice(markedCardState.cardIndex);
+if (isValidMove(cardsToMove, targetPileName, targetPileIndex)) {
+performMove(markedCardState, targetPileName, targetPileIndex, cardsToMove);
+clearMarkedState();
+render();
+} else {
+clearMarkedState();
+render();
+}
+}
+function clearMarkedState() {
+markedCardState = null;
+}
+function getCardLocation(cardEl) {
+const cardId = cardEl.dataset.id;
+const pileEl = cardEl.closest('.pile');
+const {
+pileName,
+pileIndex
+} = getPileInfo(pileEl);
+const pile = getPileArray(pileName, pileIndex);
+const cardIndex = pile.findIndex(c => c.id === cardId);
+return {
+pileName,
+pileIndex,
+cardIndex
+};
+}
+function getPileInfo(pileEl) {
+const id = pileEl.id;
+if (id.startsWith('tableau')) {
+return {
+pileName: 'tableau',
+pileIndex: parseInt(id.split('-')[1])
+};
+}
+if (id.startsWith('foundation')) {
+return {
+pileName: 'foundation',
+pileIndex: parseInt(id.split('-')[1])
+};
+}
+if (id === 'stock') return {
+pileName: 'stock',
+pileIndex: 0
+};
+if (id === 'waste') return {
+pileName: 'waste',
+pileIndex: 0
+};
+return {};
+}
+function getPileArray(pileName, pileIndex) {
+switch (pileName) {
+case 'stock':
+return piles.stock;
+case 'waste':
+return piles.waste;
+case 'foundation':
+return piles.foundations[pileIndex];
+case 'tableau':
+return piles.tableau[pileIndex];
+default:
+return [];
+}
+}
+function handleStockClick() {
+clearMarkedState();
+if (piles.stock.length > 0) {
+const card = piles.stock.pop();
+card.faceUp = true;
+piles.waste.push(card);
+} else if (piles.waste.length > 0) {
+piles.waste.forEach(card => card.faceUp = false);
+piles.stock = piles.waste.reverse();
+piles.waste = [];
+}
+render();
+}
+function canAnyMoveBeMade() {
+if (piles.stock.length > 0 || (piles.stock.length === 0 && piles.waste.length > 0)) {
+return true;
+}
+if (piles.waste.length > 0) {
+const wasteTopCard = piles.waste[piles.waste.length - 1];
+if (wasteTopCard.faceUp) {
+for (let i = 0; i < 4; i++) {
+if (isValidMove([wasteTopCard], 'foundation', i)) return true;
+}
+for (let i = 0; i < 7; i++) {
+if (isValidMove([wasteTopCard], 'tableau', i)) return true;
+}
+}
+}
+for (let i = 0; i < 7; i++) {
+const sourceTableauPile = piles.tableau[i];
+if (sourceTableauPile.length > 0) {
+const tableauTopCard = sourceTableauPile[sourceTableauPile.length - 1];
+if (tableauTopCard.faceUp) {
+for (let j = 0; j < 4; j++) {
+if (isValidMove([tableauTopCard], 'foundation', j)) return true;
+}
+}
+for (let k = 0; k < sourceTableauPile.length; k++) {
+if (sourceTableauPile[k].faceUp) {
+const cardsToMove = sourceTableauPile.slice(k);
+for (let j = 0; j < 7; j++) {
+if (i !== j) {
+if (isValidMove(cardsToMove, 'tableau', j)) return true;
+}
+}
+}
+}
+}
+}
+return false;
+}
+function startTimer() {
+if (timerInterval) clearInterval(timerInterval);
+startTime = Date.now() - (elapsedTime * 1000);
+timerInterval = setInterval(() => {
+elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+updateTimerDisplay();
+}, 1000);
+}
+function stopTimer() {
+clearInterval(timerInterval);
+timerInterval = null;
+}
+function updateTimerDisplay() {
+const minutes = Math.floor(elapsedTime / 60);
+const seconds = elapsedTime % 60;
+timerDisplayEl.textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+function loadBestTimes() {
+const storedTimes = localStorage.getItem(BEST_TIMES_KEY);
+bestTimes = storedTimes ? JSON.parse(storedTimes) : [];
+bestTimes.sort((a, b) => a.time - b.time);
+bestTimes = bestTimes.slice(0, 10);
+}
+function saveBestTimes() {
+localStorage.setItem(BEST_TIMES_KEY, JSON.stringify(bestTimes));
+}
+function addTimeToBestTimes(timeInSeconds) {
+if (timeInSeconds === 0) return;
+bestTimes.push({
+time: timeInSeconds,
+date: new Date().toISOString()
+});
+bestTimes.sort((a, b) => a.time - b.time);
+bestTimes = bestTimes.slice(0, 10);
+}
+function renderBestTimes() {
+bestTimesListEl.innerHTML = '';
+if (bestTimes.length === 0) {
+const li = document.createElement('li');
+li.textContent = 'No best times yet!';
+bestTimesListEl.appendChild(li);
+return;
+}
+bestTimes.forEach((record, index) => {
+const li = document.createElement('li');
+const minutes = Math.floor(record.time / 60);
+const seconds = record.time % 60;
+const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+const date = new Date(record.date).toLocaleDateString(undefined, {
+month: 'numeric',
+day: 'numeric'
+});
+li.textContent = `#${index + 1}: ${timeStr} (${date})`;
+bestTimesListEl.appendChild(li);
+});
+}
+function checkGameStatus() {
+const totalInFoundations = piles.foundations.reduce((sum, pile) => sum + pile.length, 0);
+if (totalInFoundations === 52) {
+stopTimer();
+addTimeToBestTimes(elapsedTime);
+saveBestTimes();
+renderBestTimes();
+winScreenEl.classList.add('visible');
+noMovesScreenEl.classList.remove('visible');
+} else if (!canAnyMoveBeMade()) {
+stopTimer();
+winScreenEl.classList.remove('visible');
+noMovesScreenEl.classList.add('visible');
+} else {
+winScreenEl.classList.remove('visible');
+noMovesScreenEl.classList.remove('visible');
+}
+}
+function initGame() {
+piles = {
+stock: [],
+waste: [],
+foundations: [
+[],
+[],
+[],
+[]
+],
+tableau: [
+[],
+[],
+[],
+[],
+[],
+[],
+[]
+]
+};
+createDeck();
+shuffleDeck();
+dealCards();
+elapsedTime = 0;
+updateTimerDisplay();
+startTimer();
+clearMarkedState();
+render();
+winScreenEl.classList.remove('visible');
+noMovesScreenEl.classList.remove('visible');
+loadBestTimes();
+renderBestTimes();
+}
+stockPileEl.addEventListener('click', handleStockClick);
+allPileEls.forEach(pile => {
+pile.addEventListener('dragover', onDragOver);
+pile.addEventListener('drop', onDrop);
+pile.addEventListener('click', onPileClick);
+});
+document.getElementById('reset-button').addEventListener('click', initGame);
+document.getElementById('win-reset-button').addEventListener('click', initGame);
+noMovesResetButton.addEventListener('click', initGame);
+const helpButton = document.getElementById('help-button');
+const helpModal = document.getElementById('help-modal');
+const closeHelpButton = document.getElementById('close-help-button');
+helpButton.addEventListener('click', () => {
+helpModal.classList.add('visible');
+});
+closeHelpButton.addEventListener('click', () => {
+helpModal.classList.remove('visible');
+});
+helpModal.addEventListener('click', (e) => {
+if (e.target === helpModal) {
+helpModal.classList.remove('visible');
+}
+});
+initGame();
+});
+</script>
+<script>
+(function() {
+const css = `
+#landscape-warning-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #000;
+color: #0f0;
+z-index: 999999;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+font-family: Consolas, 'Courier New', monospace;
+padding: 20px;
+box-sizing: border-box;
+}
+
+/* Vis kun på skjermer som er høyere enn de er brede (Portrett) */
+@media screen and (orientation: portrait) {
+#landscape-warning-overlay {
+display: flex !important;
+}
+}
+
+#landscape-warning-overlay svg {
+width: 80px;
+height: 80px;
+fill: #0f0;
+margin-bottom: 20px;
+animation: rotate-phone-anim 2s infinite ease-in-out;
+}
+
+#landscape-warning-overlay p {
+font-size: 1.2em;
+text-transform: uppercase;
+letter-spacing: 2px;
+margin: 0;
+text-shadow: 0 0 5px #0f0;
+}
+
+@keyframes rotate-phone-anim {
+0%, 10% { transform: rotate(0deg); }
+40%, 60% { transform: rotate(-90deg); }
+90%, 100% { transform: rotate(-90deg); }
+}
+`;
+const style = document.createElement('style');
+style.appendChild(document.createTextNode(css));
+document.head.appendChild(style);
+const overlay = document.createElement('div');
+overlay.id = 'landscape-warning-overlay';
+overlay.innerHTML = `
+<svg viewBox="0 0 24 24">
+<path d="M17,1.01L7,1C5.9,1 5,1.9 5,3v18c0,1.1 0.9,2 2,2h10c1.1,0 2,-0.9 2,-2V3C19,1.9 18.1,1.01 17,1.01z M17,21H7l0,-1h10V21z M17,18H7V6h10V18z M7,4V3h10v1H7z"/>
+</svg>
+<p>Please Rotate Device</p>
+`;
+document.body.appendChild(overlay);
+})();
+</script>
+<script>
+(function() {
+const css = `
+#landscape-warning-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #000;
+color: #0f0;
+z-index: 999999;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+font-family: Consolas, 'Courier New', monospace;
+padding: 20px;
+box-sizing: border-box;
+}
+
+/* Vis kun på skjermer som er høyere enn de er brede (Portrett) */
+@media screen and (orientation: portrait) {
+#landscape-warning-overlay {
+display: flex !important;
+}
+}
+
+#landscape-warning-overlay svg {
+width: 80px;
+height: 80px;
+fill: #0f0;
+margin-bottom: 20px;
+animation: rotate-phone-anim 2s infinite ease-in-out;
+}
+
+#landscape-warning-overlay p {
+font-size: 1.2em;
+text-transform: uppercase;
+letter-spacing: 2px;
+margin: 0;
+text-shadow: 0 0 5px #0f0;
+}
+
+@keyframes rotate-phone-anim {
+0%, 10% { transform: rotate(0deg); }
+40%, 60% { transform: rotate(-90deg); }
+90%, 100% { transform: rotate(-90deg); }
+}
+`;
+const style = document.createElement('style');
+style.appendChild(document.createTextNode(css));
+document.head.appendChild(style);
+const overlay = document.createElement('div');
+overlay.id = 'landscape-warning-overlay';
+overlay.innerHTML = `
+<svg viewBox="0 0 24 24">
+<path d="M17,1.01L7,1C5.9,1 5,1.9 5,3v18c0,1.1 0.9,2 2,2h10c1.1,0 2,-0.9 2,-2V3C19,1.9 18.1,1.01 17,1.01z M17,21H7l0,-1h10V21z M17,18H7V6h10V18z M7,4V3h10v1H7z"/>
+</svg>
+<p>Please Rotate Device</p>
+`;
+document.body.appendChild(overlay);
+})();
+</script>
+</body>
+</html>

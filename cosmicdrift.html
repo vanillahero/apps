@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmic Drift: Ambient Space Soundscapes</title>
+<meta name="description" content="Experience procedural ambient space soundscapes and cosmic visuals for focus, meditation, and relaxation.">
+<script src="widget.js" async></script>
+<style>
+:root {
+--planet-base: #2a2a40;
+--glow-1: rgba(100, 200, 255, 0.4);
+--glow-2: rgba(180, 100, 255, 0.3);
+--glow-3: rgba(50, 50, 100, 0.5);
+}
+body {
+margin: 0;
+height: 100vh;
+background: radial-gradient(circle at center, #0b0b15 0%, #000000 100%);
+overflow: hidden;
+display: flex;
+justify-content: center;
+align-items: center;
+font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.canvas-container {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
+filter: contrast(1.1) brightness(1.1);
+}
+canvas {
+display: block;
+}
+#planet-container {
+position: relative;
+z-index: 10;
+width: 180px;
+height: 180px;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+#planet-btn {
+width: 100%;
+height: 100%;
+border-radius: 50%;
+border: none;
+background: radial-gradient(circle at 30% 30%, #4a5a7a, #1a1a2e, #000);
+color: rgba(255, 255, 255, 0.6);
+font-size: 0.9rem;
+letter-spacing: 4px;
+text-transform: uppercase;
+cursor: pointer;
+transition: all 4s ease-in-out;
+position: relative;
+overflow: hidden;
+box-shadow:
+inset -20px -20px 50px rgba(0, 0, 0, 0.9),
+0 0 20px rgba(100, 200, 255, 0.1);
+animation: planet-rotate 60s linear infinite;
+}
+#planet-container::before {
+content: '';
+position: absolute;
+top: -10px;
+left: -10px;
+right: -10px;
+bottom: -10px;
+border-radius: 50%;
+z-index: -1;
+opacity: 0.6;
+filter: blur(20px);
+background: conic-gradient(from 0deg, var(--glow-3), var(--glow-1), var(--glow-2), var(--glow-3));
+animation: atmosphere-swirl 30s linear infinite;
+}
+#planet-btn:hover {
+color: white;
+transform: scale(1.05);
+}
+#planet-btn.active {
+color: #fff;
+text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+background: radial-gradient(circle at 30% 30%, #7aa0c0, #2a2a5e, #050510);
+box-shadow:
+inset -10px -10px 30px rgba(0, 0, 0, 0.8),
+0 0 60px var(--glow-1),
+0 0 100px var(--glow-2);
+animation: planet-pulse 12s ease-in-out infinite alternate;
+}
+@keyframes atmosphere-swirl {
+0% {
+transform: rotate(0deg);
+opacity: 0.5;
+}
+50% {
+opacity: 0.8;
+}
+100% {
+transform: rotate(360deg);
+opacity: 0.5;
+}
+}
+@keyframes planet-pulse {
+0% {
+box-shadow: 0 0 40px var(--glow-1), 0 0 80px var(--glow-2);
+}
+50% {
+box-shadow: 0 0 60px var(--glow-2), 0 0 120px var(--glow-3);
+}
+100% {
+box-shadow: 0 0 40px var(--glow-1), 0 0 80px var(--glow-2);
+}
+}
+</style>
+</head>
+<body>
+<div class="canvas-container">
+<canvas id="canvas"></canvas>
+</div>
+<div id="planet-container">
+<button id="planet-btn">Ignite</button>
+</div>
+<script>
+const canvas = document.getElementById('canvas');
+const c = canvas.getContext('2d');
+const btn = document.getElementById('planet-btn');
+let width, height;
+let stars = [];
+let flares = [];
+let isVisualsActive = false;
+function resize() {
+width = canvas.width = window.innerWidth;
+height = canvas.height = window.innerHeight;
+initStars();
+}
+window.addEventListener('resize', resize);
+class Star {
+constructor() {
+this.init();
+}
+init() {
+this.x = Math.random() * width;
+this.y = Math.random() * height;
+this.z = Math.random() * 2 + 0.5;
+this.size = Math.random() * 1.5;
+this.alpha = Math.random() * 0.5 + 0.3;
+this.twinkleSpeed = Math.random() * 0.02;
+}
+update() {
+this.x -= 0.1 * this.z;
+if (this.x < 0) {
+this.x = width;
+this.y = Math.random() * height;
+}
+this.alpha += Math.sin(Date.now() * 0.001 + this.x) * 0.005;
+}
+draw() {
+c.beginPath();
+c.arc(this.x, this.y, this.size * (this.z * 0.5), 0, Math.PI * 2);
+c.fillStyle = `rgba(255, 255, 255, ${Math.max(0.1, this.alpha)})`;
+c.fill();
+}
+}
+function initStars() {
+stars = [];
+for (let i = 0; i < 200; i++) {
+stars.push(new Star());
+}
+}
+class Flare {
+constructor() {
+this.reset();
+}
+reset() {
+this.x = width / 2;
+this.y = height / 2;
+this.angle = Math.random() * Math.PI * 2;
+this.speed = Math.random() * 0.05 + 0.02;
+this.size = Math.random() * 100 + 20;
+this.life = 0;
+this.maxLife = Math.random() * 0.6 + 0.2;
+this.fadeIn = true;
+const colors = ['#1a0b2e', '#0b1a2e', '#2e0b1a', '#0b2e2e'];
+this.color = colors[Math.floor(Math.random() * colors.length)];
+}
+update() {
+this.x += Math.cos(this.angle) * this.speed;
+this.y += Math.sin(this.angle) * this.speed;
+if (this.fadeIn) {
+this.life += 0.005;
+if (this.life >= this.maxLife) this.fadeIn = false;
+} else {
+this.life -= 0.002;
+}
+if (this.life <= 0 && !this.fadeIn) {
+if (isVisualsActive) this.reset();
+}
+}
+draw() {
+if (this.life <= 0) return;
+c.beginPath();
+c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+c.fillStyle = this.color;
+c.globalAlpha = Math.max(0, this.life * 0.3);
+c.fill();
+c.globalAlpha = 1;
+}
+}
+for (let i = 0; i < 50; i++) {
+flares.push(new Flare());
+}
+resize();
+function animate() {
+requestAnimationFrame(animate);
+c.fillStyle = 'rgba(5, 5, 10, 0.2)';
+c.fillRect(0, 0, width, height);
+stars.forEach(s => {
+s.update();
+s.draw();
+});
+if (isVisualsActive) {
+flares.forEach(p => {
+p.update();
+p.draw();
+});
+}
+}
+animate();
+let ctx = null;
+let masterGain = null;
+let reverbNode = null;
+let compressor = null;
+let isPlaying = false;
+let t1, t2, t3, t4, tMode;
+const MODES = [
+[110.00, 130.81, 146.83, 164.81, 196.00, 220.00, 261.63],
+[110.00, 138.59, 164.81, 185.00, 220.00, 246.94, 277.18],
+[110.00, 116.54, 138.59, 146.83, 164.81, 174.61, 220.00],
+[110.00, 130.81, 164.81, 196.00, 220.00, 261.63, 329.63]
+];
+let currentModeIndex = 0;
+let currentScale = MODES[0];
+function initAudio() {
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+ctx = new AudioContext();
+masterGain = ctx.createGain();
+masterGain.gain.value = 0.45;
+reverbNode = ctx.createConvolver();
+reverbNode.buffer = createDeepReverb(ctx);
+compressor = ctx.createDynamicsCompressor();
+compressor.threshold.setValueAtTime(-3.0, ctx.currentTime);
+compressor.knee.setValueAtTime(0, ctx.currentTime);
+compressor.ratio.setValueAtTime(20.0, ctx.currentTime);
+compressor.attack.setValueAtTime(0.001, ctx.currentTime);
+compressor.release.setValueAtTime(0.1, ctx.currentTime);
+const dryGain = ctx.createGain();
+dryGain.gain.value = 0.6;
+const wetGain = ctx.createGain();
+wetGain.gain.value = 0.8;
+masterGain.connect(dryGain);
+masterGain.connect(reverbNode);
+reverbNode.connect(wetGain);
+dryGain.connect(compressor);
+wetGain.connect(compressor);
+compressor.connect(ctx.destination);
+}
+function createDeepReverb(context) {
+const duration = 8;
+const length = context.sampleRate * duration;
+const impulse = context.createBuffer(2, length, context.sampleRate);
+const L = impulse.getChannelData(0);
+const R = impulse.getChannelData(1);
+for (let i = 0; i < length; i++) {
+const n = i / length;
+const fadeIn = Math.min(1, i / (context.sampleRate * 0.05));
+const decay = Math.pow(1 - n, 4);
+L[i] = (Math.random() * 2 - 1) * decay * fadeIn * 0.5;
+R[i] = (Math.random() * 2 - 1) * decay * fadeIn * 0.5;
+}
+return impulse;
+}
+function playAtmosphericPad(freq, dur, vol, filterSettings, noiseSettings = {}, lfoSettings = {}) {
+if (!isPlaying) return;
+const now = ctx.currentTime;
+const actualAttackDuration = 2.5;
+const sustainDuration = dur;
+const releaseDuration = 10.0;
+const osc1 = ctx.createOscillator();
+const osc2 = ctx.createOscillator();
+const osc3 = ctx.createOscillator();
+osc1.type = 'triangle';
+osc2.type = 'sine';
+osc3.type = 'sine';
+const drift = (Math.random() - 0.5) * 0.5;
+osc1.frequency.setValueAtTime(freq + drift, now);
+osc2.frequency.setValueAtTime(freq - drift, now);
+osc2.detune.value = 1.0;
+osc3.frequency.setValueAtTime(freq * 0.5, now);
+const osc3Gain = ctx.createGain();
+osc3Gain.gain.value = 0.03;
+osc3.connect(osc3Gain);
+const bufferSize = ctx.sampleRate * 2;
+const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+const output = noiseBuffer.getChannelData(0);
+for (let i = 0; i < bufferSize; i++) {
+output[i] = Math.random() * 2 - 1;
+}
+const noiseSource = ctx.createBufferSource();
+noiseSource.buffer = noiseBuffer;
+noiseSource.loop = true;
+const noiseFilter = ctx.createBiquadFilter();
+noiseFilter.type = noiseSettings.type || 'bandpass';
+noiseFilter.frequency.value = noiseSettings.freq || 800;
+noiseFilter.Q.value = noiseSettings.Q || 3;
+const noiseGain = ctx.createGain();
+noiseGain.gain.value = noiseSettings.volume || 0.1;
+const filter = ctx.createBiquadFilter();
+filter.type = filterSettings.type;
+filter.Q.value = filterSettings.Q || 0.3;
+const initialFilterFreq = filterSettings.initialFreq || (filterSettings.freq ? filterSettings.freq * 0.1 : 200);
+const targetFilterFreq = filterSettings.freq || 1000;
+filter.frequency.setValueAtTime(initialFilterFreq, now);
+filter.frequency.linearRampToValueAtTime(targetFilterFreq, now + actualAttackDuration * 0.8);
+if (lfoSettings.enabled) {
+const lfo = ctx.createOscillator();
+lfo.type = lfoSettings.type || 'sine';
+lfo.frequency.setValueAtTime(lfoSettings.rate || 0.2, now);
+const lfoGain = ctx.createGain();
+lfoGain.gain.setValueAtTime(lfoSettings.depth || 50, now);
+lfo.connect(lfoGain);
+lfoGain.connect(filter.frequency);
+lfo.start(now);
+lfo.stop(now + actualAttackDuration + sustainDuration + releaseDuration + 0.5);
+}
+const gain = ctx.createGain();
+gain.gain.setValueAtTime(0, now);
+gain.gain.linearRampToValueAtTime(vol, now + actualAttackDuration);
+gain.gain.linearRampToValueAtTime(vol, now + actualAttackDuration + sustainDuration);
+gain.gain.exponentialRampToValueAtTime(0.001, now + actualAttackDuration + sustainDuration + releaseDuration);
+gain.gain.linearRampToValueAtTime(0, now + actualAttackDuration + sustainDuration + releaseDuration + 0.5);
+osc1.connect(filter);
+osc2.connect(filter);
+osc3Gain.connect(filter);
+noiseSource.connect(noiseFilter);
+noiseFilter.connect(noiseGain);
+noiseGain.connect(filter);
+filter.connect(gain);
+gain.connect(masterGain);
+const totalDuration = actualAttackDuration + sustainDuration + releaseDuration + 1.0;
+osc1.start(now);
+osc2.start(now);
+osc3.start(now);
+noiseSource.start(now);
+osc1.stop(now + totalDuration);
+osc2.stop(now + totalDuration);
+osc3.stop(now + totalDuration);
+noiseSource.stop(now + totalDuration);
+}
+function loopDrone() {
+if (!isPlaying) return;
+const freq = currentScale[Math.floor(Math.random() * currentScale.length)];
+playAtmosphericPad(freq / 2, 14, 0.15, {
+type: 'lowpass',
+freq: 600,
+Q: 0.5,
+initialFreq: 80
+}, {
+volume: 0.1,
+type: 'bandpass',
+freq: 800,
+Q: 3
+}, {
+enabled: true,
+rate: 0.15,
+depth: 20
+});
+t1 = setTimeout(loopDrone, 4000 + Math.random() * 4000);
+}
+function loopBass() {
+if (!isPlaying) return;
+const bassFreq = currentScale[0] / 2;
+playAtmosphericPad(bassFreq, 16, 0.25, {
+type: 'lowpass',
+freq: 250,
+Q: 0.4,
+initialFreq: 50
+}, {
+volume: 0.05,
+type: 'bandpass',
+freq: 600,
+Q: 2
+}, {
+enabled: true,
+rate: 0.1,
+depth: 15
+});
+t2 = setTimeout(loopBass, 8000 + Math.random() * 6000);
+}
+function loopHigh() {
+if (!isPlaying) return;
+if (Math.random() > 0.4) {
+const freq = currentScale[Math.floor(Math.random() * currentScale.length)] * 2;
+playAtmosphericPad(freq, 10, 0.02, {
+type: 'lowpass',
+freq: 4000,
+Q: 0.5,
+initialFreq: 200
+}, {
+volume: 0.15,
+type: 'highpass',
+freq: 1500,
+Q: 1.8
+}, {
+enabled: true,
+rate: 0.3,
+depth: 40
+});
+}
+t3 = setTimeout(loopHigh, 3000 + Math.random() * 3000);
+}
+function playNoiseSweep(vol) {
+if (!isPlaying) return;
+const now = ctx.currentTime;
+const bufferSize = ctx.sampleRate * 2;
+const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+const output = noiseBuffer.getChannelData(0);
+for (let i = 0; i < bufferSize; i++) {
+output[i] = Math.random() * 2 - 1;
+}
+const source = ctx.createBufferSource();
+source.buffer = noiseBuffer;
+source.loop = true;
+const filter = ctx.createBiquadFilter();
+filter.type = 'bandpass';
+filter.Q.value = 1;
+filter.frequency.setValueAtTime(20, now);
+filter.frequency.linearRampToValueAtTime(1000, now + 10);
+filter.frequency.linearRampToValueAtTime(20, now + 20);
+const gain = ctx.createGain();
+gain.gain.setValueAtTime(0, now);
+gain.gain.linearRampToValueAtTime(vol, now + 1);
+gain.gain.linearRampToValueAtTime(0, now + 18);
+source.connect(filter);
+filter.connect(gain);
+gain.connect(masterGain);
+source.start(now);
+source.stop(now + 20);
+}
+function rotateMode() {
+if (!isPlaying) return;
+currentModeIndex = (currentModeIndex + 1) % MODES.length;
+currentScale = MODES[currentModeIndex];
+const nextShift = 30000 + Math.random() * 20000;
+tMode = setTimeout(rotateMode, nextShift);
+}
+function loopTexture() {
+if (!isPlaying) return;
+if (Math.random() < 0.5) {
+playNoiseSweep(0.08);
+}
+t4 = setTimeout(loopTexture, 15000 + Math.random() * 20000);
+}
+btn.onclick = () => {
+if (!isPlaying) {
+if (!ctx) initAudio();
+if (ctx.state === 'suspended') ctx.resume();
+isPlaying = true;
+isVisualsActive = true;
+btn.textContent = "Stop";
+btn.classList.add('active');
+masterGain.gain.setValueAtTime(0, ctx.currentTime);
+masterGain.gain.linearRampToValueAtTime(0.45, ctx.currentTime + 5);
+loopDrone();
+setTimeout(loopDrone, 3000);
+loopBass();
+setTimeout(loopHigh, 2000);
+loopTexture();
+tMode = setTimeout(rotateMode, 30000);
+} else {
+isPlaying = false;
+isVisualsActive = false;
+btn.textContent = "Ignite";
+btn.classList.remove('active');
+const now = ctx.currentTime;
+masterGain.gain.cancelScheduledValues(now);
+masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+masterGain.gain.linearRampToValueAtTime(0, now + 4);
+clearTimeout(t1);
+clearTimeout(t2);
+clearTimeout(t3);
+clearTimeout(t4);
+clearTimeout(tMode);
+}
+};
+</script>
+</body>
+</html>

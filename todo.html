@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pro Todo | Minimal Dark Task Manager</title>
+<meta name="description" content="Efficient, fast, and professional dark mode todo list to organize your daily tasks effortlessly.">
+<script src="widget.js" async></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+<style>
+:root {
+--bg: #121212;
+--card: #1e1e1e;
+--text: #d4d4d4;
+--muted: #888;
+--accent: #4a90e2;
+--accent-hover: #357abd;
+--danger: #cf6679;
+--border: #333;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+
+html, body {
+background-color: var(--bg);
+color: var(--text);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+width: 100%;
+height: 100%;
+overflow-x: hidden;
+}
+
+body {
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.container {
+width: 100%;
+max-width: 800px;
+padding: 10px;
+display: flex;
+flex-direction: column;
+}
+
+.header {
+padding: 10px 0;
+text-align: left;
+}
+
+.header h1 {
+font-size: 1.2rem;
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: var(--accent);
+}
+
+.input-group {
+display: flex;
+gap: 5px;
+margin-bottom: 15px;
+width: 100%;
+}
+
+input[type="text"] {
+flex: 1;
+background: var(--card);
+border: 1px solid var(--border);
+color: var(--text);
+padding: 12px;
+border-radius: 4px;
+font-size: 1rem;
+outline: none;
+min-width: 0;
+}
+
+input[type="text"]:focus {
+border-color: var(--accent);
+}
+
+button.add-btn {
+background: var(--accent);
+color: white;
+border: none;
+padding: 0 15px;
+border-radius: 4px;
+cursor: pointer;
+font-weight: bold;
+font-size: 0.9rem;
+white-space: nowrap;
+}
+
+ul {
+list-style: none;
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+
+li {
+background: var(--card);
+padding: 8px 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+border-bottom: 1px solid #252525;
+}
+
+.handle {
+cursor: grab;
+color: var(--muted);
+font-size: 1rem;
+user-select: none;
+}
+
+.task-content {
+flex: 1;
+display: flex;
+align-items: center;
+cursor: pointer;
+gap: 10px;
+min-width: 0;
+}
+
+.checkbox {
+width: 18px;
+height: 18px;
+border: 1px solid var(--muted);
+border-radius: 2px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+font-size: 0.8rem;
+}
+
+li.done .checkbox {
+background: var(--accent);
+border-color: var(--accent);
+color: white;
+}
+
+li.done .task-text {
+text-decoration: line-through;
+color: var(--muted);
+}
+
+.task-text {
+font-size: 0.95rem;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.delete-btn {
+background: transparent;
+border: none;
+color: var(--muted);
+cursor: pointer;
+font-size: 1.2rem;
+padding: 5px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.delete-btn:hover {
+color: var(--danger);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>Tasks</h1>
+</div>
+
+<div class="input-group">
+<input type="text" id="taskInput" placeholder="New task..." autocomplete="off">
+<button class="add-btn" id="addBtn">ADD</button>
+</div>
+
+<ul id="todoList"></ul>
+</div>
+
+<script>
+let todos = [];
+const STORAGE_KEY = 'pro_todo_app_data';
+
+document.addEventListener('DOMContentLoaded', () => {
+loadTodos();
+setupSortable();
+document.getElementById('addBtn').addEventListener('click', addTodo);
+document.getElementById('taskInput').addEventListener('keypress', (e) => {
+if (e.key === 'Enter') addTodo();
+});
+});
+
+function setupSortable() {
+const el = document.getElementById('todoList');
+Sortable.create(el, {
+handle: '.handle',
+animation: 150,
+onEnd: () => {
+saveOrder();
+}
+});
+}
+
+function loadTodos() {
+const stored = localStorage.getItem(STORAGE_KEY);
+if (stored) {
+todos = JSON.parse(stored);
+}
+renderList();
+}
+
+function saveTodos() {
+localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+}
+
+function renderList() {
+const list = document.getElementById('todoList');
+list.innerHTML = '';
+todos.forEach(todo => {
+const li = document.createElement('li');
+li.setAttribute('data-id', todo.id);
+if (todo.done) li.classList.add('done');
+
+li.innerHTML = `
+<div class="handle">⠿</div>
+<div class="task-content" onclick="toggleTask('${todo.id}')">
+<div class="checkbox">${todo.done ? '✓' : ''}</div>
+<span class="task-text">${todo.text}</span>
+</div>
+<button class="delete-btn" onclick="deleteTask('${todo.id}')">×</button>
+`;
+list.appendChild(li);
+});
+}
+
+function addTodo() {
+const input = document.getElementById('taskInput');
+const text = input.value.trim();
+if (text) {
+const newTodo = {
+id: Date.now().toString(),
+text: text,
+done: false
+};
+todos.unshift(newTodo);
+saveTodos();
+renderList();
+input.value = '';
+input.focus();
+}
+}
+
+function toggleTask(id) {
+const todo = todos.find(t => t.id === id);
+if (todo) {
+todo.done = !todo.done;
+saveTodos();
+renderList();
+}
+}
+
+function deleteTask(id) {
+todos = todos.filter(t => t.id !== id);
+saveTodos();
+renderList();
+}
+
+function saveOrder() {
+const listItems = document.querySelectorAll('#todoList li');
+const newOrderIds = Array.from(listItems).map(item => item.getAttribute('data-id'));
+const reorderedTodos = [];
+const todoMap = new Map(todos.map(t => [t.id, t]));
+newOrderIds.forEach(id => {
+if (todoMap.has(id)) {
+reorderedTodos.push(todoMap.get(id));
+}
+});
+todos = reorderedTodos;
+saveTodos();
+}
+</script>
+</body>
+</html>
