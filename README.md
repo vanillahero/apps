@@ -1,1 +1,1 @@
-### &copy; VanillaHero
+### &copy; Johnny Heggelund
