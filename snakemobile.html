@@ -315,55 +315,50 @@ grid-column: 3;
 grid-row: 2;
 }
 #rotate-message {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  color: #0f0;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  text-align: center;
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+background: #000;
+color: #0f0;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+z-index: 2147483647;
+text-align: center;
 }
-
 #rotate-message svg {
-  width: 64px;
-  height: 64px;
-  fill: #0f0;
-  margin-bottom: 20px;
-  animation: rotate-to-portrait 2s infinite ease-in-out;
+width: 64px;
+height: 64px;
+fill: #0f0;
+margin-bottom: 20px;
+animation: rotate-to-portrait 2s infinite ease-in-out;
 }
-
 @keyframes rotate-to-portrait {
-  0%,
-  100% {
-    transform: rotate(90deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
+0%,
+100% {
+transform: rotate(90deg);
 }
-
+50% {
+transform: rotate(0deg);
+}
+}
 @media (orientation: landscape) {
-  #rotate-message {
-    display: flex;
-  }
+#rotate-message {
+display: flex;
+}
 }
 </style>
 </head>
 <body>
-
 <div id="rotate-message">
 <svg viewBox="0 0 24 24">
 <path d="M17,1.01L7,1C5.9,1 5,1.9 5,3v18c0,1.1 0.9,2 2,2h10c1.1,0 2,-0.9 2,-2V3C19,1.9 18.1,1.01 17,1.01z M17,21H7l0,-1h10V21z M17,18H7V6h10V18z M7,4V3h10v1H7z" />
 </svg>
 <p>PLEASE ROTATE DEVICE</p>
 </div>
-
 <div id="game-container">
 <div id="game-area">
 <div id="ui-top">
@@ -381,7 +376,6 @@ grid-row: 2;
 </div>
 <div id="start-screen" class="overlay visible">
 <h1>SNAKE</h1>
-<button style="display: block; margin: 0 auto 0 auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
 <p class="instructions">Use arrow buttons to control</p>
 <button id="start-button">Start Game</button>
 <div id="start-screen-highscores">
@@ -401,7 +395,6 @@ grid-row: 2;
 </div>
 </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 'use strict';
@@ -792,30 +785,24 @@ return distance < minDistance;
 function draw() {
 ctx.fillStyle = '#000';
 ctx.fillRect(0, 0, canvasSize, canvasSize);
-
 ctx.fillStyle = OBSTACLE_COLOR;
 obstacles.forEach((ob) => {
 ctx.fillRect(ob.x * cellSize, ob.y * cellSize, cellSize, cellSize);
 });
-
 ctx.font = `${cellSize * 0.9}px "Courier New"`;
 ctx.textAlign = 'center';
 ctx.textBaseline = 'middle';
 ctx.fillText(food.type.emoji, food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2.6);
-
 snake.forEach((segment, index) => {
 ctx.fillStyle = index === 0 ? SNAKE_HEAD_COLOR : SNAKE_BODY_COLOR;
 ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
 });
-
 ctx.strokeStyle = BORDER_COLOR;
 ctx.lineWidth = 2;
-
 ctx.beginPath();
 ctx.moveTo(0, 1);
 ctx.lineTo(canvasSize, 1);
 ctx.stroke();
-
 ctx.beginPath();
 ctx.moveTo(0, canvasSize - 1);
 ctx.lineTo(canvasSize, canvasSize - 1);

@@ -18,13 +18,11 @@
 --danger: #cf6679;
 --border: #333;
 }
-
 * {
 box-sizing: border-box;
 margin: 0;
 padding: 0;
 }
-
 html, body {
 background-color: var(--bg);
 color: var(--text);
@@ -33,13 +31,11 @@ width: 100%;
 height: 100%;
 overflow-x: hidden;
 }
-
 body {
 display: flex;
 flex-direction: column;
 align-items: center;
 }
-
 .container {
 width: 100%;
 max-width: 800px;
@@ -47,12 +43,10 @@ padding: 10px;
 display: flex;
 flex-direction: column;
 }
-
 .header {
 padding: 10px 0;
 text-align: left;
 }
-
 .header h1 {
 font-size: 1.2rem;
 font-weight: 500;
@@ -60,14 +54,12 @@ text-transform: uppercase;
 letter-spacing: 1px;
 color: var(--accent);
 }
-
 .input-group {
 display: flex;
 gap: 5px;
 margin-bottom: 15px;
 width: 100%;
 }
-
 input[type="text"] {
 flex: 1;
 background: var(--card);
@@ -79,11 +71,9 @@ font-size: 1rem;
 outline: none;
 min-width: 0;
 }
-
 input[type="text"]:focus {
 border-color: var(--accent);
 }
-
 button.add-btn {
 background: var(--accent);
 color: white;
@@ -95,14 +85,12 @@ font-weight: bold;
 font-size: 0.9rem;
 white-space: nowrap;
 }
-
 ul {
 list-style: none;
 display: flex;
 flex-direction: column;
 gap: 2px;
 }
-
 li {
 background: var(--card);
 padding: 8px 12px;
@@ -111,14 +99,12 @@ align-items: center;
 gap: 10px;
 border-bottom: 1px solid #252525;
 }
-
 .handle {
 cursor: grab;
 color: var(--muted);
 font-size: 1rem;
 user-select: none;
 }
-
 .task-content {
 flex: 1;
 display: flex;
@@ -127,7 +113,6 @@ cursor: pointer;
 gap: 10px;
 min-width: 0;
 }
-
 .checkbox {
 width: 18px;
 height: 18px;
@@ -139,25 +124,21 @@ justify-content: center;
 flex-shrink: 0;
 font-size: 0.8rem;
 }
-
 li.done .checkbox {
 background: var(--accent);
 border-color: var(--accent);
 color: white;
 }
-
 li.done .task-text {
 text-decoration: line-through;
 color: var(--muted);
 }
-
 .task-text {
 font-size: 0.95rem;
 overflow: hidden;
 text-overflow: ellipsis;
 white-space: nowrap;
 }
-
 .delete-btn {
 background: transparent;
 border: none;
@@ -169,33 +150,25 @@ display: flex;
 align-items: center;
 justify-content: center;
 }
-
 .delete-btn:hover {
 color: var(--danger);
 }
 </style>
 </head>
-
 <body>
-
 <div class="container">
-
 <div class="header">
 <h1>Tasks</h1>
 </div>
-
 <div class="input-group">
 <input type="text" id="taskInput" placeholder="New task..." autocomplete="off">
 <button class="add-btn" id="addBtn">ADD</button>
 </div>
-
 <ul id="todoList"></ul>
 </div>
-
 <script>
 let todos = [];
 const STORAGE_KEY = 'pro_todo_app_data';
-
 document.addEventListener('DOMContentLoaded', () => {
 loadTodos();
 setupSortable();
@@ -204,7 +177,6 @@ document.getElementById('taskInput').addEventListener('keypress', (e) => {
 if (e.key === 'Enter') addTodo();
 });
 });
-
 function setupSortable() {
 const el = document.getElementById('todoList');
 Sortable.create(el, {
@@ -215,7 +187,6 @@ saveOrder();
 }
 });
 }
-
 function loadTodos() {
 const stored = localStorage.getItem(STORAGE_KEY);
 if (stored) {
@@ -223,11 +194,9 @@ todos = JSON.parse(stored);
 }
 renderList();
 }
-
 function saveTodos() {
 localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
-
 function renderList() {
 const list = document.getElementById('todoList');
 list.innerHTML = '';
@@ -235,7 +204,6 @@ todos.forEach(todo => {
 const li = document.createElement('li');
 li.setAttribute('data-id', todo.id);
 if (todo.done) li.classList.add('done');
-
 li.innerHTML = `
 <div class="handle">⠿</div>
 <div class="task-content" onclick="toggleTask('${todo.id}')">
@@ -247,7 +215,6 @@ li.innerHTML = `
 list.appendChild(li);
 });
 }
-
 function addTodo() {
 const input = document.getElementById('taskInput');
 const text = input.value.trim();
@@ -264,7 +231,6 @@ input.value = '';
 input.focus();
 }
 }
-
 function toggleTask(id) {
 const todo = todos.find(t => t.id === id);
 if (todo) {
@@ -273,13 +239,11 @@ saveTodos();
 renderList();
 }
 }
-
 function deleteTask(id) {
 todos = todos.filter(t => t.id !== id);
 saveTodos();
 renderList();
 }
-
 function saveOrder() {
 const listItems = document.querySelectorAll('#todoList li');
 const newOrderIds = Array.from(listItems).map(item => item.getAttribute('data-id'));

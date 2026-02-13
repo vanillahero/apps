@@ -127,7 +127,6 @@ transform: scale(1)
 </div>
 <div id="message">
 <h1>Shufflepuck</h1>
-<button style="display: block; margin: 0 auto 0 auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
 <p>Choose Difficulty</p>
 <div id="difficulty-options">
 <button class="difficulty-btn" data-speed="5.0">Beginner</button>
@@ -472,7 +471,6 @@ aScoreEl.innerText = '0';
 gameState = 'MENU';
 }
 function startGameWithDifficulty(e) {
-// IMPORTANT: Initialize audio immediately on user interaction
 initAudio();
 const speed = parseFloat(e.target.dataset.speed);
 CONFIG.aiSpeed = speed;
@@ -604,12 +602,10 @@ draw();
 requestAnimationFrame(loop);
 }
 window.addEventListener('resize', resize);
-
 window.addEventListener('mousedown', e => {
 lastInputPos.x = e.clientX;
 lastInputPos.y = e.clientY;
 });
-
 window.addEventListener('mousemove', e => {
 if (gameState !== 'PLAYING') return;
 const dx = (e.clientX - lastInputPos.x) / (scaleFactor * CONFIG.perspective);
@@ -619,7 +615,6 @@ input.y += dy;
 lastInputPos.x = e.clientX;
 lastInputPos.y = e.clientY;
 });
-
 window.addEventListener('touchstart', e => {
 const touch = e.touches[0];
 lastInputPos.x = touch.clientX;
@@ -627,7 +622,6 @@ lastInputPos.y = touch.clientY;
 }, {
 passive: false
 });
-
 window.addEventListener('touchmove', e => {
 if (gameState !== 'PLAYING') return;
 e.preventDefault();

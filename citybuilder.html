@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>City Builder</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2275%22 font-size=%2280%22 text-anchor=%22middle%22>%F0%9F%8F%A0</text></svg>">
 <style>
   html {
     box-sizing: border-box;
@@ -2512,7 +2511,6 @@ function showHelp() {
   const modalContent = modal.querySelector('.modal-content');
   if (!modalContent) return;
   modalContent.innerHTML = `<span class="modal-close">&times;</span>
-<button style="display: block; margin: 0 auto 10px auto; background: transparent; border: 1px solid green; color: cornflowerblue; padding: 7px 4px 4px 4px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(138, 43, 226, 0.2);" onclick="window.open('https://vanillahero.com', '_blank')">VanillaHero.com</button>
 <h2>City Builder Guide</h2>
 <p>Welcome, Mayor! Your goal is to grow a metropolis of <strong>${config.WIN_CONDITION_POPULATION.toLocaleString()}</strong> residents. Avoid bankruptcy at all costs!</p>
 
