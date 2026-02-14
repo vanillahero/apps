@@ -3,31 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>App Packer & Protector Pro</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2275%22 font-size=%2280%22 text-anchor=%22middle%22>%F0%9F%94%92</text></svg>">
   <style>
     body { background: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
     .container { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
     h2 { margin: 0; color: #bb86fc; }
+    #dropZone { border: 2px dashed #333; padding: 40px; text-align: center; color: #888; transition: 0.3s; cursor: pointer; }
+    #dropZone.hover { border-color: #bb86fc; background: #1e1e1e; color: #bb86fc; }
     textarea { background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 10px; flex-grow: 1; resize: none; font-family: monospace; outline: none; }
-    .controls { display: flex; gap: 10px; align-items: center; }
-    input { background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 8px; flex-grow: 1; outline: none; }
+    .controls { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
     button { background: #bb86fc; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
     button:hover { background: #9965f4; }
     button.secondary { background: #03dac6; }
-    .label { font-size: 0.9em; color: #888; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2>Source Code</h2>
+    <div id="dropZone">Drag and drop index.html here, or paste below</div>
     <textarea id="sourceInput" placeholder="Paste your index.html here..."></textarea>
 
     <div class="controls">
-      <div style="flex-grow: 1;">
-        <div class="label">Lock to domain:</div>
-        <input type="text" id="domainInput" value="itch.io">
-      </div>
       <button onclick="packApp()">Pack & Protect</button>
     </div>
 
@@ -40,10 +36,33 @@
   </div>
 
   <script>
+    const dropZone = document.getElementById('dropZone');
+    const sourceInput = document.getElementById('sourceInput');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('hover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('hover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('hover');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          sourceInput.value = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    });
 
     function packApp() {
-      const source = document.getElementById('sourceInput').value;
-      const domain = document.getElementById('domainInput').value;
+      const source = sourceInput.value;
       if (!source) return;
 
       const titleMatch = source.match(/<title>(.*?)<\/title>/i);
@@ -52,13 +71,7 @@
       const protectionScript = `
 <script>
 (function() {
-  const d = "${domain}";
   setInterval(function() { debugger; }, 100);
-  if (window.location.hostname !== "" && !window.location.hostname.includes(d) && !window.location.hostname.includes("localhost")) {
-    document.body.innerHTML = "<div style='background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><h1>Unauthorized Distribution</h1></div>";
-    window.stop();
-    throw "";
-  }
   document.addEventListener("contextmenu", e => e.preventDefault());
   document.addEventListener("keydown", e => {
     if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) e.preventDefault();
@@ -69,18 +82,18 @@
       const combinedSource = source.replace("</head>", protectionScript + "</head>");
       const base64App = btoa(unescape(encodeURIComponent(combinedSource)));
 
-      const finalTemplate = `<!DOCTYPE html>
+      const finalTemplate = \`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>${originalTitle}</title>
+  <title>\${originalTitle}</title>
 </head>
-<body style="margin:0;padding:0;background:#000;overflow:hidden;">
-  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#333;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;">Loading...</div>
+<body style="margin:0;padding:0;background:#121212;overflow:hidden;">
+  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#121212;color:#bb86fc;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;font-weight:bold;">Loading...</div>
   <script>
     (function() {
       try {
-        const b = "${base64App}";
+        const b = "\${base64App}";
         const d = decodeURIComponent(escape(atob(b)));
         document.open();
         document.write(d);
@@ -93,7 +106,7 @@
     })();
   <\/script>
 </body>
-</html>`;
+</html>\`;
 
       document.getElementById('outputArea').value = finalTemplate;
     }
