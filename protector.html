@@ -2,77 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading...</title>
+  <title>App Packer & Protector Pro</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #0a0a0a;
-      color: #e0e0e0;
-      font-family: sans-serif;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-    }
-
-    #app-container {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: none;
-    }
-
-    .error-screen {
-      text-align: center;
-      display: none;
-    }
+    body { background: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+    .container { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
+    h2 { margin: 0; color: #bb86fc; }
+    textarea { background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 10px; flex-grow: 1; resize: none; font-family: monospace; outline: none; }
+    .controls { display: flex; gap: 10px; align-items: center; }
+    input { background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 8px; flex-grow: 1; outline: none; }
+    button { background: #bb86fc; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #9965f4; }
+    button.secondary { background: #03dac6; }
+    .label { font-size: 0.9em; color: #888; }
   </style>
 </head>
 <body>
 
-  <iframe id="app-container"></iframe>
+  <div class="container">
+    <h2>Source Code</h2>
+    <textarea id="sourceInput" placeholder="Paste your index.html here..."></textarea>
 
-  <div id="error-screen" class="error-screen">
-    <h1>Access Denied</h1>
-    <p>This application is restricted to authorized domains.</p>
+    <div class="controls">
+      <div style="flex-grow: 1;">
+        <div class="label">Lock to domain:</div>
+        <input type="text" id="domainInput" value="itch.io">
+      </div>
+      <button onclick="packApp()">Pack & Protect</button>
+    </div>
+
+    <h2>Protected Output</h2>
+    <textarea id="outputArea" readonly></textarea>
+    <div class="controls">
+      <button onclick="copyOutput()" style="flex-grow: 1;">Copy to Clipboard</button>
+      <button class="secondary" onclick="downloadFile()" style="flex-grow: 1;">Download index-protected.html</button>
+    </div>
   </div>
 
   <script>
 
-    const initProtection = () => {
-      const allowedDomains = ["itch.io", "vanillahero.com", "github.io"];
-      const currentHost = window.location.hostname;
-      const isAuthorized = allowedDomains.some(domain => currentHost.endsWith(domain));
-      if (isAuthorized) {
-        loadApplication();
-      } else {
-        document.getElementById("error-screen").style.display = "block";
+    function packApp() {
+      const source = document.getElementById('sourceInput').value;
+      const domain = document.getElementById('domainInput').value;
+      if (!source) return;
+
+      const titleMatch = source.match(/<title>(.*?)<\/title>/i);
+      const originalTitle = titleMatch ? titleMatch[1] : "Protected App";
+
+      const protectionScript = `
+<script>
+(function() {
+  const d = "${domain}";
+  setInterval(function() { debugger; }, 100);
+  if (window.location.hostname !== "" && !window.location.hostname.includes(d) && !window.location.hostname.includes("localhost")) {
+    document.body.innerHTML = "<div style='background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><h1>Unauthorized Distribution</h1></div>";
+    window.stop();
+    throw "";
+  }
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("keydown", e => {
+    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) e.preventDefault();
+  });
+})();
+<\/script>`;
+
+      const combinedSource = source.replace("</head>", protectionScript + "</head>");
+      const base64App = btoa(unescape(encodeURIComponent(combinedSource)));
+
+      const finalTemplate = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${originalTitle}</title>
+</head>
+<body style="margin:0;padding:0;background:#000;overflow:hidden;">
+  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#333;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;">Loading...</div>
+  <script>
+    (function() {
+      try {
+        const b = "${base64App}";
+        const d = decodeURIComponent(escape(atob(b)));
+        document.open();
+        document.write(d);
+        document.close();
+        const l = document.getElementById("l");
+        if (l) l.remove();
+      } catch(e) {
+        document.getElementById("l").innerHTML = "Error loading app.";
       }
+    })();
+  <\/script>
+</body>
+</html>`;
+
+      document.getElementById('outputArea').value = finalTemplate;
     }
 
-    const loadApplication = () => {
-      const iframe = document.getElementById("app-container");
-      const appSource = "app-content.html";
-      iframe.src = appSource;
-      iframe.onload = () => {
-        iframe.style.display = "block";
-        try {
-          const appTitle = iframe.contentDocument.title;
-          if (appTitle) {
-            document.title = appTitle;
-          }
-        } catch (e) {
-          console.warn("Title sync skipped due to domain policy.");
-        }
-      };
+    function copyOutput() {
+      const output = document.getElementById('outputArea');
+      output.select();
+      document.execCommand('copy');
     }
 
-    window.onload = initProtection;
-
+    function downloadFile() {
+      const content = document.getElementById('outputArea').value;
+      if (!content) return;
+      const blob = new Blob([content], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'index-protected.html';
+      a.click();
+    }
   </script>
+
 </body>
 </html>
