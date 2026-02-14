@@ -567,8 +567,8 @@ border-color: #2da042 !important;
 <div id="statusbar">
 <span id="cursor-pos" style="flex: 1; font-size: 12px; color: #858585; font-variant-numeric: tabular-nums; padding-left: 5px;">Ln 1, Col 1</span>
 <div id="shortcuts" style="display: flex; align-items: center;">
-<button onclick="editor.openFile()" title="Open File (Ctrl+O)">📂 Open</button>
-<button onclick="editor.saveFile()" title="Save File (Ctrl+S)">💾 Save</button>
+<button onclick="editor.openFile()" title="Open File (Ctrl+O)">📂 Import</button>
+<button onclick="editor.saveFile()" title="Save File (Ctrl+S)">💾 Export</button>
 <button onclick="editor.newFile()" style="margin-right: 10px;" title="New File (Ctrl+N)">📄 New</button>
 <strong>Cycle</strong>
 <button onclick="editor.cycleNext('comment')" title="Jump to next comment">Comments</button>
@@ -2906,12 +2906,11 @@ return r.join('\n');
 }
 newFile() {
 const currentFile = this.state.files[this.state.activeFileIndex];
-if (currentFile.isDirty && !confirm("You have unsaved changes. Are you sure you want to discard them and create a new file?")) {
-this.setStatus("New File creation cancelled.");
+if (currentFile.isDirty && !confirm("You have unsaved changes. Discard them?")) {
 return;
 }
 const newFile = {
-name: `file-${this.state.files.length + 1}.txt`,
+name: 'untitled.txt',
 lines: [""],
 isDirty: false,
 cursor: {
@@ -2919,7 +2918,6 @@ row: 0,
 col: 0
 },
 selectionAnchor: null,
-fullPath: null,
 fileHandle: null
 };
 if (currentFile.lines.length === 1 && currentFile.lines[0] === "" && !currentFile.isDirty) {
@@ -2929,52 +2927,31 @@ this.state.files.push(newFile);
 this.state.activeFileIndex = this.state.files.length - 1;
 }
 this.search.reset();
-this.state.cursor = {
-row: 0,
-col: 0
-};
-this.state.selectionAnchor = null;
-this.highlighter.analyze(this.state.lines, this.state.fileName);
 this.history.undoStack = [];
+this.history.redoStack = [];
 this.renderTabs();
 this.finalizeUpdate();
-this.setStatus("New File created: " + this.state.fileName);
+this.setStatus("New file created");
 const statusEl = document.getElementById('file-status');
-if (statusEl) statusEl.textContent = this.state.fileName;
+if (statusEl) statusEl.textContent = newFile.name;
 this.dom.trap.focus({
 preventScroll: true
 });
 }
-
 setStatus(msg) {
 this.dom.messageArea.textContent = msg;
 clearTimeout(this.statusTimeout);
 this.statusTimeout = setTimeout(() => this.dom.messageArea.textContent = 'SingleScoop', 3000);
 }
 async openFile() {
-const isIframe = window.self !== window.top;
-if (!isIframe && 'showOpenFilePicker' in window) {
-try {
-const [h] = await window.showOpenFilePicker();
-const f = await h.getFile();
-this.loadFileContent(await f.text(), f.name, null, false, h);
-return;
-} catch (e) {
-if (e.name === 'AbortError') {
-this.setStatus("File open cancelled.");
-return;
-}
-console.warn("Moderne åpning feilet, prøver gammel metode...", e);
-this.setStatus("Modern file API failed, trying fallback.");
-}
-}
 const input = document.createElement('input');
 input.type = 'file';
 input.style.display = 'none';
+input.accept = '.txt,.js,.html,.css,.json,.md';
 input.onchange = (e) => {
 const file = e.target.files[0];
 if (!file) {
-this.setStatus("File open cancelled.");
+this.setStatus("Open cancelled");
 return;
 }
 const reader = new FileReader();
@@ -3034,56 +3011,45 @@ this.dom.trap.focus({
 preventScroll: true
 });
 }
-async saveFile() {
+saveFile() {
 const activeFile = this.state.files[this.state.activeFileIndex];
 const content = this.state.lines.join('\n');
-let handle = activeFile.fileHandle;
-let fileName = activeFile.name;
-try {
-if (!handle) {
-if (!('showSaveFilePicker' in window)) {
-throw new Error('Modern file API not supported.');
-}
-const opts = {
-suggestedName: fileName,
-types: [{
-description: 'Text Files',
-accept: {
-'text/plain': ['.txt', '.js', '.html', '.css', '.json', '.md']
-}
-}, ],
-};
-handle = await window.showSaveFilePicker(opts);
-activeFile.fileHandle = handle;
-fileName = handle.name;
-}
-const writable = await handle.createWritable();
-const encoder = new TextEncoder();
-const encodedContent = encoder.encode(content);
-await writable.write(encodedContent);
-await writable.close();
-activeFile.name = fileName;
-activeFile.isDirty = false;
-this.state.fileName = fileName;
-this.renderTabs();
-this.setStatus(`Saved: ${fileName}`);
-document.title = fileName + " - SingleScoop";
-} catch (e) {
-if (e.name === 'AbortError') {
-this.setStatus("Save cancelled by user.");
-} else if ('showSaveFilePicker' in window) {
-this.setStatus(`Error saving file: ${e.message}`);
-console.error("Error saving file with modern API:", e);
+let currentName = activeFile.name;
+let suggestedName = currentName;
+const versionMatch = currentName.match(/^(.*)(-v)(\d+)(\.[^.]+)$/);
+if (versionMatch) {
+const base = versionMatch[1];
+const vPrefix = versionMatch[2];
+const num = parseInt(versionMatch[3], 10);
+const ext = versionMatch[4];
+const nextNum = String(num + 1).padStart(3, '0');
+suggestedName = `${base}${vPrefix}${nextNum}${ext}`;
 } else {
-console.warn("Modern file API not supported, falling back to download.");
-this.setStatus("Modern API not available. Downloading file...");
+const extIndex = currentName.lastIndexOf('.');
+if (extIndex !== -1) {
+const base = currentName.substring(0, extIndex);
+const ext = currentName.substring(extIndex);
+suggestedName = `${base}-v001${ext}`;
+} else {
+suggestedName = `${currentName}-v001`;
+}
+}
+const newName = prompt("Save file as:", suggestedName);
+if (!newName) {
+this.setStatus("Save cancelled");
+return;
+}
+activeFile.name = newName;
+this.state.fileName = newName;
+const statusEl = document.getElementById('file-status');
+if (statusEl) statusEl.textContent = newName;
 const blob = new Blob([content], {
 type: 'text/plain;charset=utf-8'
 });
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
 a.href = url;
-a.download = fileName;
+a.download = newName;
 a.style.display = 'none';
 document.body.appendChild(a);
 a.click();
@@ -3093,14 +3059,8 @@ window.URL.revokeObjectURL(url);
 }, 100);
 activeFile.isDirty = false;
 this.renderTabs();
-this.setStatus(`Exported: ${fileName}`);
-document.title = fileName + " - SingleScoop";
-}
-} finally {
-this.dom.trap.focus({
-preventScroll: true
-});
-}
+this.setStatus(`Saved: ${newName}`);
+document.title = newName + " - SingleScoop";
 }
 setupDragAndDrop() {
 const dropZone = document.body;
