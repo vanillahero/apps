@@ -441,12 +441,13 @@ Open<input type="file" id="project-input" accept=".json" style="display:none">
 </div>
 <div id="opt-crop" class="option-group hidden">
 <div class="crop-ratio-group">
-<label style="font-size:11px; color:#888;">Ratio:</label>
-<button class="btn secondary crop-ratio-btn active" data-ratio="free">Free</button>
-<button class="btn secondary crop-ratio-btn" data-ratio="square">1:1</button>
-<button class="btn secondary crop-ratio-btn" data-ratio="4:3">4:3</button>
-<button class="btn secondary crop-ratio-btn" data-ratio="16:9">16:9</button>
-<button class="btn secondary crop-ratio-btn" data-ratio="1.91:1">1.91:1</button>
+  <label style="font-size:11px; color:#888;">Ratio:</label>
+  <button class="btn secondary crop-ratio-btn active" data-ratio="free">Free</button>
+  <button class="btn secondary crop-ratio-btn" data-ratio="square">1:1</button>
+  <button class="btn secondary crop-ratio-btn" data-ratio="4:3">4:3</button>
+  <button class="btn secondary crop-ratio-btn" data-ratio="16:9">16:9</button>
+  <button class="btn secondary crop-ratio-btn" data-ratio="1.91:1">1.91:1</button>
+  <button class="btn secondary crop-ratio-btn" data-ratio="63:50">63:50 (itch.io cover image)</button>
 </div>
 <span id="crop-dimensions" style="font-size:11px; color:#888; white-space:nowrap;">Draw rect to crop</span>
 <button class="btn" id="btn-apply-crop">Apply</button>
@@ -1640,11 +1641,12 @@ cropOverlay.style.cursor = 'default';
 updateUI();
 }
 function getAspectRatioNums(aspectRatio) {
-if (aspectRatio === 'square') return [1, 1];
-if (aspectRatio === '4:3') return [4, 3];
-if (aspectRatio === '16:9') return [16, 9];
-if (aspectRatio === '1.91:1') return [1.91, 1];
-return [1, 1];
+  if (aspectRatio === 'square') return [1, 1];
+  if (aspectRatio === '4:3') return [4, 3];
+  if (aspectRatio === '16:9') return [16, 9];
+  if (aspectRatio === '1.91:1') return [1.91, 1];
+  if (aspectRatio === '63:50') return [63, 50];
+  return [1, 1];
 }
 function moveCropRect(currentPos) {
 const {
