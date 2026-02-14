@@ -162,7 +162,7 @@ body {
         <span id="moves-display">MOVES: 0</span>
         <span id="pushes-display">PUSHES: 0</span>
     </div>
-    
+
     <div id="game-board"></div>
 
     <div id="controls">
@@ -172,10 +172,11 @@ body {
     <div class="hint-text">Swipe to move • Double-tap for levels</div>
 </div>
 
-<!-- Intro Modal -->
+
 <div id="intro-modal" class="modal-overlay" style="display: flex;">
     <div class="modal-content">
         <h2 style="color: var(--player-color); margin-top: 0;">SOKOBAN MOBILE</h2>
+        <p style="margin: 0 0 0 0; color: CornFlowerBlue;">&copy; Johnny Heggelund</p>
         <p>Push the boxes 📦 onto the marks ✅</p>
         <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; font-size: 0.9rem;">
             • <b>Swipe</b> any direction to move<br>
@@ -186,7 +187,7 @@ body {
     </div>
 </div>
 
-<!-- Level Chooser -->
+
 <div id="level-chooser" class="modal-overlay">
     <div class="modal-content">
         <h3 style="margin-top: 0;">SELECT LEVEL</h3>
@@ -9658,7 +9659,7 @@ class SokobanGame {
                 const char = line[x] || ' ';
                 if (char === '@' || char === '+') this.playerPos = { x, y };
                 if (char === '.' || char === '+' || char === '*') this.goals.push({ x, y });
-                
+
                 if (char === '*') row.push('$');
                 else if (char === '+' || char === '.') row.push(' ');
                 else row.push(char);
@@ -9671,7 +9672,7 @@ class SokobanGame {
     move(dx, dy) {
         const nx = this.playerPos.x + dx;
         const ny = this.playerPos.y + dy;
-        
+
         if (ny < 0 || ny >= this.board.length || nx < 0 || nx >= this.maxCols) return false;
         const target = this.board[ny][nx];
 
@@ -9683,7 +9684,7 @@ class SokobanGame {
             const by = ny + dy;
             if (by < 0 || by >= this.board.length || bx < 0 || bx >= this.maxCols) return false;
             if (this.board[by][bx] !== ' ') return false;
-            
+
             this.saveHistory();
             this.board[by][bx] = '$';
             this.board[ny][nx] = ' ';
@@ -9738,10 +9739,10 @@ class UIManager {
             row.forEach((char, x) => {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-                
+
                 if (char === '#') tile.classList.add('wall');
                 if (this.game.isGoal(x, y)) tile.classList.add('goal');
-                
+
                 if (x === this.game.playerPos.x && y === this.game.playerPos.y) {
                     tile.classList.add(this.game.isGoal(x, y) ? 'player-on-goal' : 'player');
                 } else if (char === '$') {
@@ -9813,7 +9814,7 @@ class App {
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
             touchStartY = e.changedTouches[0].screenY;
-            
+
             const now = Date.now();
             if (now - lastTap < 300) {
                 this.ui.toggleLevelChooser();
@@ -9824,7 +9825,7 @@ class App {
         document.addEventListener('touchend', (e) => {
             const dx = e.changedTouches[0].screenX - touchStartX;
             const dy = e.changedTouches[0].screenY - touchStartY;
-            
+
             if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
                 if (Math.abs(dx) > Math.abs(dy)) {
                     this.handleMove(dx > 0 ? 1 : -1, 0);
