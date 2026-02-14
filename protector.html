@@ -70,7 +70,8 @@
       const originalTitle = titleMatch ? titleMatch[1] : "Protected App";
 
       const metaMatches = source.match(/<meta[^>]*>/gi) || [];
-      const metaTags = metaMatches.join('\n  ');
+      const uniqueMetaTags = metaMatches.filter(tag => !tag.toLowerCase().includes("charset"));
+      const metaTags = uniqueMetaTags.join('\n  ');
 
       const protectionScript = '\n<script>\n(function() {\n  setInterval(function() { debugger; }, 100);\n  document.addEventListener("contextmenu", e => e.preventDefault());\n  document.addEventListener("keydown", e => {\n    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) e.preventDefault();\n  });\n})();\n<\/script>';
 
