@@ -78,10 +78,9 @@
 
       let finalTemplate = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n';
       finalTemplate += '  <title>' + originalTitle + '</title>\n';
-      finalTemplate += '  ' + metaTags + '\n';
-      finalTemplate += '  <style>body,html{margin:0;padding:0;height:100%;width:100%}</style>\n</head>\n';
-      finalTemplate += '<body style="background:#000;">\n';
-      finalTemplate += '  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#121212;color:#bb86fc;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;font-weight:bold;">Loading...</div>\n';
+      finalTemplate += '  ' + metaTags + '\n</head>\n';
+      finalTemplate += '<body>\n';
+      finalTemplate += '  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;color:#000;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;">Loading...</div>\n';
       finalTemplate += '  <script>\n    (function() {\n      try {\n        const b = "' + base64App + '";\n';
       finalTemplate += '        const d = decodeURIComponent(escape(atob(b)));\n';
       finalTemplate += '        document.open();\n        document.write(d);\n        document.close();\n';
