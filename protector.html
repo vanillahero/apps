@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>App Packer & Protector Pro</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2275%22 font-size=%2280%22 text-anchor=%22middle%22>%F0%9F%94%92</text></svg>">
   <style>
     body { background: #121212; color: #e0e0e0; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
     .container { padding: 20px; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
@@ -69,20 +68,24 @@
       const titleMatch = source.match(/<title>(.*?)<\/title>/i);
       const originalTitle = titleMatch ? titleMatch[1] : "Protected App";
 
+      const metaMatches = source.match(/<meta[^>]*>/gi) || [];
+      const metaTags = metaMatches.join('\n  ');
+
       const protectionScript = '\n<script>\n(function() {\n  setInterval(function() { debugger; }, 100);\n  document.addEventListener("contextmenu", e => e.preventDefault());\n  document.addEventListener("keydown", e => {\n    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) e.preventDefault();\n  });\n})();\n<\/script>';
 
       const combinedSource = source.replace("</head>", protectionScript + "</head>");
       const base64App = btoa(unescape(encodeURIComponent(combinedSource)));
 
       let finalTemplate = '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n';
-      finalTemplate += '  <title>' + originalTitle + '</title>\n</head>\n';
-      finalTemplate += '<body style="margin:0;padding:0;background:#121212;overflow:hidden;">\n';
+      finalTemplate += '  <title>' + originalTitle + '</title>\n';
+      finalTemplate += '  ' + metaTags + '\n';
+      finalTemplate += '  <style>body,html{margin:0;padding:0;height:100%;width:100%}</style>\n</head>\n';
+      finalTemplate += '<body style="background:#000;">\n';
       finalTemplate += '  <div id="l" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#121212;color:#bb86fc;display:flex;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;font-weight:bold;">Loading...</div>\n';
       finalTemplate += '  <script>\n    (function() {\n      try {\n        const b = "' + base64App + '";\n';
       finalTemplate += '        const d = decodeURIComponent(escape(atob(b)));\n';
       finalTemplate += '        document.open();\n        document.write(d);\n        document.close();\n';
-      finalTemplate += '        const l = document.getElementById("l");\n        if (l) l.remove();\n';
-      finalTemplate += '      } catch(e) {\n        document.getElementById("l").innerHTML = "Error loading app.";\n      }\n    })();\n  <\/script>\n</body>\n</html>';
+      finalTemplate += '        const l = document.getElementById("l");\n        if (l) l.remove();\n      } catch(e) {\n        document.getElementById("l").innerHTML = "Error loading app.";\n      }\n    })();\n  <\/script>\n</body>\n</html>';
 
       document.getElementById('outputArea').value = finalTemplate;
     }
