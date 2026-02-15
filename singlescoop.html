@@ -3174,15 +3174,6 @@ document.getElementById('color-picker').style.display = 'none';
 window.onload = () => {
 window.editor = new EditorEngine();
 };
-window.onbeforeunload = (e) => {
-if (window.editor && window.editor.state.isDirty) {
-const confirmationMessage = "You have unsaved changes. Do you want to close and discard them?";
-e.preventDefault();
-e.returnValue = confirmationMessage;
-return confirmationMessage;
-}
-return undefined;
-};
 </script>
 </body>
 </html>
