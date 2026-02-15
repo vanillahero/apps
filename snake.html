@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Snake</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%22 y=%2275%22 font-size=%2280%22 text-anchor=%22middle%22>%F0%9F%90%8D</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root {
 --bg-color: #121212;
@@ -100,7 +97,8 @@ animation: canvas-flash 0.5s ease-out;
 }
 body {
 color: var(--primary-text);
-font-family: 'Press Start 2P', cursive;
+font-family: 'Courier New', Courier, monospace;
+font-weight: bold;
 display: flex;
 justify-content: center;
 align-items: center;
@@ -190,7 +188,8 @@ text-shadow: 3px 3px var(--bg-color);
 margin-bottom: 20px;
 }
 button {
-font-family: 'Press Start 2P', cursive;
+font-family: 'Courier New', Courier, monospace;
+font-weight: bold;
 font-size: 1em;
 padding: 15px 30px;
 margin: 10px;
@@ -211,7 +210,8 @@ box-shadow: 0 0 15px var(--accent-color);
 transform: scale(1.05);
 }
 #player-name-input {
-font-family: 'Press Start 2P', cursive;
+font-family: 'Courier New', Courier, monospace;
+font-weight: bold;
 text-align: center;
 font-size: 1em;
 padding: 10px;
@@ -731,20 +731,20 @@ const distance = Math.abs(x - head.x) + Math.abs(y - head.y);
 return distance < minDistance;
 }
 function draw() {
-ctx.fillStyle = '#000';
-ctx.fillRect(0, 0, canvasSize, canvasSize);
-ctx.fillStyle = OBSTACLE_COLOR;
-obstacles.forEach((ob) => {
-ctx.fillRect(ob.x * cellSize, ob.y * cellSize, cellSize, cellSize);
-});
-ctx.font = `${cellSize * 0.9}px "Press Start 2P"`;
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillText(food.type.emoji, food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2.6);
-snake.forEach((segment, index) => {
-ctx.fillStyle = index === 0 ? SNAKE_HEAD_COLOR : SNAKE_BODY_COLOR;
-ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
-});
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvasSize, canvasSize);
+  ctx.fillStyle = OBSTACLE_COLOR;
+  obstacles.forEach((ob) => {
+    ctx.fillRect(ob.x * cellSize, ob.y * cellSize, cellSize, cellSize);
+  });
+  ctx.font = `bold ${cellSize * 0.9}px "Courier New", monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(food.type.emoji, food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2.6);
+  snake.forEach((segment, index) => {
+    ctx.fillStyle = index === 0 ? SNAKE_HEAD_COLOR : SNAKE_BODY_COLOR;
+    ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+  });
 }
 function handleKeyDown(e) {
 if (gameOver) return;
